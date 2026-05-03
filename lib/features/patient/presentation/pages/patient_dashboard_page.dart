@@ -62,20 +62,13 @@ class PatientDashboardPage extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
+                children: const [
+                  Text(
                     'Artikel Terbaru',
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Lihat Semua ->',
-                      style: TextStyle(color: AppColors.primaryDark),
                     ),
                   ),
                 ],

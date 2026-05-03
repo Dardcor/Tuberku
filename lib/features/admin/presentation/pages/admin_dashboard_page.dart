@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class AdminDashboardPage extends StatelessWidget {
@@ -70,7 +71,7 @@ class AdminDashboardPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 _buildTracingList(),
                 const SizedBox(height: 24),
-                _buildQuickActions(),
+                _buildQuickActions(context),
                 const SizedBox(height: 24),
               ],
             ),
@@ -285,8 +286,8 @@ class AdminDashboardPage extends StatelessWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
+          children: const [
+            Text(
               'Persebaran Kasus',
               style: TextStyle(
                 fontSize: 18,
@@ -294,13 +295,6 @@ class AdminDashboardPage extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Fullscreen ->',
-                style: TextStyle(color: AppColors.primary),
-              ),
-            )
           ],
         ),
         const SizedBox(height: 8),
@@ -370,8 +364,8 @@ class AdminDashboardPage extends StatelessWidget {
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
+          children: const [
+            Text(
               'Tracing Terbaru',
               style: TextStyle(
                 fontSize: 18,
@@ -379,13 +373,6 @@ class AdminDashboardPage extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Lihat Semua',
-                style: TextStyle(color: AppColors.primary),
-              ),
-            )
           ],
         ),
         const SizedBox(height: 8),
@@ -471,7 +458,7 @@ class AdminDashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -487,41 +474,53 @@ class AdminDashboardPage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildActionButton(Icons.person_add, 'Tambah\nPasien', AppColors.primary),
-            _buildActionButton(Icons.warning_amber_rounded, 'Tandai\nZona', AppColors.danger),
-            _buildActionButton(Icons.message, 'Kirim\nPesan', AppColors.primary),
+            _buildActionButton(
+              Icons.person_add,
+              'Tambah\nPasien',
+              AppColors.primary,
+              () => context.push('/admin/add-patient'),
+            ),
+            _buildActionButton(
+              Icons.warning_amber_rounded,
+              'Tandai\nZona',
+              AppColors.danger,
+              () => context.push('/admin/mark-zone'),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
+  Widget _buildActionButton(IconData icon, String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 28,
+            ),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 28,
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'admin_dashboard_page.dart';
+import 'admin_profile_page.dart';
 
 class AdminMainPage extends StatefulWidget {
   const AdminMainPage({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
   final List<Widget> _pages = [
     const AdminDashboardPage(),
     const Center(child: Text('Halaman Peta')),
-    const Center(child: Text('Halaman Profil')),
+    const AdminProfilePage(),
   ];
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class LoginPage extends StatelessWidget {
@@ -102,7 +103,9 @@ class _BottomContent extends StatelessWidget {
         const SizedBox(height: 32),
         // Patient Button
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            context.push('/activation'); // Route to Activation (Patient flow)
+          },
           icon: const Icon(Icons.person, color: Colors.white),
           label: const Text(
             'MASUK SEBAGAI PASIEN',
@@ -121,7 +124,9 @@ class _BottomContent extends StatelessWidget {
         const SizedBox(height: 16),
         // Officer Button
         OutlinedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            context.push('/admin-dashboard'); // Route directly to Admin Dashboard
+          },
           icon: const Icon(Icons.grid_view, color: AppColors.textPrimary),
           label: const Text(
             'MASUK SEBAGAI PETUGAS',
@@ -167,7 +172,9 @@ class _BottomContent extends StatelessWidget {
         Center(
           child: InkWell(
             borderRadius: BorderRadius.circular(4),
-            onTap: () {},
+            onTap: () {
+              context.push('/register');
+            },
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: RichText(

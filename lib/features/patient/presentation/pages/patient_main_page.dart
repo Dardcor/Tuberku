@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'patient_dashboard_page.dart';
+import 'patient_profile_page.dart';
 
 class PatientMainPage extends StatefulWidget {
   const PatientMainPage({super.key});
@@ -16,7 +17,7 @@ class _PatientMainPageState extends State<PatientMainPage> {
     const PatientDashboardPage(),
     const Scaffold(body: Center(child: Text('AI Asisten'))),
     const Scaffold(body: Center(child: Text('Peta'))),
-    const Scaffold(body: Center(child: Text('Profil'))),
+    const PatientProfilePage(),
   ];
 
   @override
