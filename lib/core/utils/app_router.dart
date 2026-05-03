@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/activation_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/pages/consent_page.dart';
 import '../../features/patient/presentation/pages/patient_main_page.dart';
 import '../../features/admin/presentation/pages/admin_main_page.dart';
 import '../../features/admin/presentation/pages/admin_add_patient_page.dart';
@@ -26,6 +27,11 @@ class AppRouter {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/consent',
+        name: 'consent',
+        builder: (context, state) => const ConsentPage(),
       ),
       GoRoute(
         path: '/patient-dashboard',

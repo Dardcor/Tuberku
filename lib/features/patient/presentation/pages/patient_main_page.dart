@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 import 'patient_dashboard_page.dart';
+import 'ai_chat_page.dart';
+import 'pharmacy_map_page.dart';
 import 'patient_profile_page.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class PatientMainPage extends StatefulWidget {
   const PatientMainPage({super.key});
@@ -15,15 +17,18 @@ class _PatientMainPageState extends State<PatientMainPage> {
 
   final List<Widget> _pages = [
     const PatientDashboardPage(),
-    const Scaffold(body: Center(child: Text('AI Asisten'))),
-    const Scaffold(body: Center(child: Text('Peta'))),
+    const AiChatPage(),
+    const PharmacyMapPage(),
     const PatientProfilePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

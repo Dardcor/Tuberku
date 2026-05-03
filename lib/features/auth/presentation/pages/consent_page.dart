@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class ConsentPage extends StatefulWidget {
@@ -18,12 +19,12 @@ class _ConsentPageState extends State<ConsentPage> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () {
-            // Navigation placeholder
-          },
-        ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () {
+              context.pop();
+            },
+          ),
         title: const Text(
           'Persetujuan Penggunaan Data',
           style: TextStyle(
@@ -193,7 +194,8 @@ class _ConsentPageState extends State<ConsentPage> {
                 child: ElevatedButton(
                   onPressed: _isAgreed
                       ? () {
-                          // Action when agreed
+                          // Save consent status to local storage or API
+                          context.go('/patient-dashboard');
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -219,7 +221,7 @@ class _ConsentPageState extends State<ConsentPage> {
               // Skip Button
               TextButton(
                 onPressed: () {
-                  // Action skip
+                  context.go('/patient-dashboard');
                 },
                 child: const Text(
                   'Lewati untuk sekarang',

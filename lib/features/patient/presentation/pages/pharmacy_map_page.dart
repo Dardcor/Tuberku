@@ -36,7 +36,7 @@ class _PharmacyMapPageState extends State<PharmacyMapPage> {
           Positioned.fill(
             child: Container(
               color: AppColors.primaryBackground,
-              child: const CustomPaint(
+              child: CustomPaint(
                 painter: MockMapGridPainter(),
               ),
             ),
