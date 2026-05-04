@@ -1,0 +1,16 @@
+abstract class AppRoutes {
+  static const String roleSelection = '/';
+  static const String activation = '/activation';
+  static const String consentGps = '/consent-gps';
+  static const String patientDashboard = '/patient/dashboard';
+  static const String articleList = '/patient/articles';
+  static const String articleDetail = '/patient/articles/detail';
+  static const String facilityMap = '/patient/map';
+  static const String facilityDetail = '/patient/facility/detail';
+  static const String aiChat = '/patient/ai-chat';
+  static const String adminDashboard = '/admin/dashboard';
+  static const String heatmap = '/admin/heatmap';
+  static const String tracingTimeline = '/admin/tracing';
+  static const String tracingDetail = '/admin/tracing/detail';
+  static const String interventionForm = '/admin/intervention';
+}

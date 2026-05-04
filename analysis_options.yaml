@@ -7,7 +7,6 @@ linter:
     - prefer_const_constructors_in_immutables
     - avoid_print
     - avoid_empty_else
-    - avoid_redundant_argument_values
     - always_declare_return_types
     - cancel_subscriptions
     - close_sinks
@@ -15,7 +14,6 @@ linter:
     - prefer_single_quotes
     - prefer_final_fields
     - prefer_final_locals
-    - require_trailing_commas
     - sort_child_properties_last
     - unawaited_futures
     - use_key_in_widget_constructors
