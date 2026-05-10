@@ -20,10 +20,6 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-          onPressed: () {},
-        ),
         title: Text(
           'Tuberku',
           style: AppTextStyles.titleLarge.copyWith(color: AppColors.primary),
@@ -113,7 +109,7 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
                   Get.toNamed(AppRoutes.articleList);
                   break;
                 case 4:
-                  // Profile - future
+                  Get.toNamed(AppRoutes.profile);
                   break;
               }
             },
@@ -185,7 +181,7 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
           Text(
             'Jangan lupa minum obat hari ini. Tetap semangat!',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.white.withValues(alpha: 0.85),
+              color: AppColors.white.withOpacity(0.85),
             ),
           ),
         ],
@@ -300,7 +296,7 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
           color: AppColors.successLight,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: AppColors.primary.withOpacity(0.3),
           ),
         ),
         child: Row(
@@ -308,7 +304,7 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -324,7 +320,9 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
                 children: [
                   Text(
                     'Punya pertanyaan seputar TBC?',
-                    style: AppTextStyles.titleMedium.copyWith(fontSize: 14),
+                    style: AppTextStyles.titleMedium.copyWith(
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(

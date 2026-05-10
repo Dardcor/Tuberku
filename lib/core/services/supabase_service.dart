@@ -29,8 +29,13 @@ class SupabaseService extends GetxService {
   Future<AuthResponse> signUp({
     required String email,
     required String password,
+    Map<String, dynamic>? data,
   }) async {
-    return await _client.auth.signUp(email: email, password: password);
+    return await _client.auth.signUp(
+      email: email,
+      password: password,
+      data: data,
+    );
   }
 
   Future<AuthResponse> signIn({
@@ -217,5 +222,49 @@ class SupabaseService extends GetxService {
           },
         )
         .subscribe();
+  }
+
+  // ─── Chat History ────────────────────────────────────
+  Future<List<Map<String, dynamic>>> getChatSessions() async {
+    final user = currentUser;
+    if (user == null) return [];
+    
+    return await _client
+        .from('chat_sessions')
+        .select()
+        .eq('profile_id', user.id)
+        .order('created_at', ascending: false);
+  }
+
+  Future<String> createChatSession(String? title) async {
+    final user = currentUser;
+    if (user == null) throw Exception('User not logged in');
+    
+    final response = await _client.from('chat_sessions').insert({
+      'profile_id': user.id,
+      'title': title ?? 'Sesi Chat Baru',
+    }).select().single();
+    
+    return response['id'] as String;
+  }
+
+  Future<List<Map<String, dynamic>>> getChatMessages(String sessionId) async {
+    return await _client
+        .from('chat_messages')
+        .select()
+        .eq('session_id', sessionId)
+        .order('created_at', ascending: true);
+  }
+
+  Future<void> saveChatMessage({
+    required String sessionId,
+    required String role,
+    required String content,
+  }) async {
+    await _client.from('chat_messages').insert({
+      'session_id': sessionId,
+      'role': role,
+      'content': content,
+    });
   }
 }

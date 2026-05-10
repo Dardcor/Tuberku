@@ -3,6 +3,9 @@ import 'app_routes.dart';
 import '../../features/auth/bindings/auth_binding.dart';
 import '../../features/auth/views/role_selection_screen.dart';
 import '../../features/auth/views/activation_screen.dart';
+import '../../features/auth/views/login_screen.dart';
+import '../../features/auth/views/register_screen.dart';
+import '../../features/auth/views/petugas_login_screen.dart';
 import '../../features/auth/views/consent_gps_screen.dart';
 import '../../features/patient/bindings/patient_binding.dart';
 import '../../features/patient/views/patient_dashboard_screen.dart';
@@ -18,6 +21,8 @@ import '../../features/admin/views/heatmap_screen.dart';
 import '../../features/admin/views/tracing_timeline_screen.dart';
 import '../../features/admin/views/tracing_detail_screen.dart';
 import '../../features/admin/views/intervention_form_screen.dart';
+import '../../features/profile/views/profile_screen.dart';
+import '../../features/profile/bindings/profile_binding.dart';
 
 class AppPages {
   AppPages._();
@@ -34,6 +39,18 @@ class AppPages {
       name: AppRoutes.activation,
       page: () => const ActivationScreen(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.login,
+      page: () => const LoginScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.petugasLogin,
+      page: () => const PetugasLoginScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.register,
+      page: () => const RegisterScreen(),
     ),
     GetPage(
       name: AppRoutes.consentGps,
@@ -94,6 +111,11 @@ class AppPages {
       name: AppRoutes.interventionForm,
       page: () => const InterventionFormScreen(),
       binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.profile,
+      page: () => const ProfileScreen(),
+      binding: ProfileBinding(),
     ),
   ];
 }

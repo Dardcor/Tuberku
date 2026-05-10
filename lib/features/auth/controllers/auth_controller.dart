@@ -24,17 +24,76 @@ class AuthController extends GetxController {
   final codeControllers = List.generate(6, (_) => TextEditingController());
   final phoneController = TextEditingController();
 
+  String get fullCode {
+    return codeControllers.map((c) => c.text).join();
+  }
+
+  // Registration
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneRegisterController = TextEditingController();
+  final passwordController = TextEditingController();
+  final isObscure = true.obs;
+  final isRegistering = false.obs;
+
   @override
   void onClose() {
     for (final controller in codeControllers) {
       controller.dispose();
     }
     phoneController.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    phoneRegisterController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 
-  String get fullCode {
-    return codeControllers.map((c) => c.text).join();
+  Future<void> register() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final phone = phoneRegisterController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
+      Get.snackbar('Error', 'Semua field wajib diisi',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100);
+      return;
+    }
+
+    if (password.length < 6) {
+      Get.snackbar('Error', 'Password minimal 6 karakter',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100);
+      return;
+    }
+
+    isRegistering.value = true;
+
+    try {
+      final response = await _supabase.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': name,
+        },
+      );
+
+      if (response.user != null) {
+        Get.snackbar('Berhasil', 'Akun berhasil dibuat. Silakan login.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.shade100);
+        
+        Get.offAllNamed(AppRoutes.roleSelection);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mendaftar: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.shade100);
+    } finally {
+      isRegistering.value = false;
+    }
   }
 
   Future<void> activateAccount() async {
@@ -145,7 +204,15 @@ class AuthController extends GetxController {
     Get.toNamed(AppRoutes.activation);
   }
 
+  void navigateToLogin() {
+    Get.toNamed(AppRoutes.login);
+  }
+
   void navigateToAdminDashboard() {
     Get.offAllNamed(AppRoutes.adminDashboard);
+  }
+
+  void navigateToRegister() {
+    Get.toNamed(AppRoutes.register);
   }
 }

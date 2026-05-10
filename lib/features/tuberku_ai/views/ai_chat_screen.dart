@@ -30,7 +30,7 @@ class AiChatScreen extends GetView<AiController> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.5),
+                    color: AppColors.accent.withOpacity(0.5),
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),
@@ -41,34 +41,14 @@ class AiChatScreen extends GetView<AiController> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Reset Chat',
-            onPressed: () {
-              Get.dialog(
-                AlertDialog(
-                  title: const Text('Reset Chat?'),
-                  content: const Text(
-                    'Semua riwayat percakapan akan dihapus.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Get.back(),
-                      child: const Text('Batal'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        controller.clearChat();
-                        Get.back();
-                      },
-                      child: const Text(
-                        'Reset',
-                        style: TextStyle(color: AppColors.danger),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+            icon: const Icon(Icons.add_comment_outlined),
+            tooltip: 'Chat Baru',
+            onPressed: () => controller.startNewChat(),
+          ),
+          IconButton(
+            icon: const Icon(Icons.history_outlined),
+            tooltip: 'Riwayat Chat',
+            onPressed: () => _showHistoryBottomSheet(context),
           ),
         ],
       ),
@@ -99,29 +79,60 @@ class AiChatScreen extends GetView<AiController> {
           ),
           // Chat messages
           Expanded(
-            child: Obx(() => ListView.builder(
-                  controller: controller.scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+            child: Obx(() {
+              if (controller.messages.isEmpty && !controller.isTyping.value) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.monitor_heart_outlined,
+                        size: 64,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Tuberku AI',
+                        style: AppTextStyles.headlineMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Apa yang bisa saya bantu?',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
-                  itemCount: controller.messages.length +
-                      (controller.isTyping.value ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == controller.messages.length &&
-                        controller.isTyping.value) {
-                      return _buildTypingIndicator();
-                    }
+                );
+              }
+              return ListView.builder(
+                controller: controller.scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                itemCount: controller.messages.length +
+                    (controller.isTyping.value ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == controller.messages.length &&
+                      controller.isTyping.value) {
+                    return _buildTypingIndicator();
+                  }
 
-                    final message = controller.messages[index];
-                    return ChatBubble(
-                      text: message.text,
-                      isUser: message.isUser,
-                      source: message.source,
-                      time: DateFormat('HH:mm').format(message.timestamp),
-                    );
-                  },
-                )),
+                  final message = controller.messages[index];
+                  return ChatBubble(
+                    text: message.text,
+                    isUser: message.isUser,
+                    source: message.source,
+                    time: DateFormat('HH:mm').format(message.timestamp),
+                  );
+                },
+              );
+            }),
           ),
           // Quick questions
           SizedBox(
@@ -149,7 +160,7 @@ class AiChatScreen extends GetView<AiController> {
               color: AppColors.cardBg,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
+                  color: Colors.black.withOpacity(0.06),
                   blurRadius: 8,
                   offset: const Offset(0, -2),
                 ),
@@ -164,7 +175,7 @@ class AiChatScreen extends GetView<AiController> {
                       textCapitalization: TextCapitalization.sentences,
                       decoration: InputDecoration(
                         hintText: 'Tanya seputar TBC...',
-                        hintStyle: TextStyle(color: AppColors.textHint),
+                        hintStyle: const TextStyle(color: Colors.grey),
                         filled: true,
                         fillColor: AppColors.background,
                         border: OutlineInputBorder(
@@ -203,51 +214,155 @@ class AiChatScreen extends GetView<AiController> {
     );
   }
 
+  void _showHistoryBottomSheet(BuildContext context) {
+    controller.loadSessions();
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Riwayat Percakapan', style: AppTextStyles.titleLarge),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Get.back(),
+                ),
+              ],
+            ),
+            const Divider(),
+            Expanded(
+              child: Obx(() {
+                if (controller.sessions.isEmpty) {
+                  return const Center(child: Text('Belum ada riwayat chat'));
+                }
+                return ListView.builder(
+                  itemCount: controller.sessions.length,
+                  itemBuilder: (context, index) {
+                    final session = controller.sessions[index];
+                    final date = DateTime.parse(session['created_at']);
+                    return ListTile(
+                      leading: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+                      title: Text(
+                        session['title'] ?? 'Sesi Chat',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(DateFormat('dd MMM yyyy, HH:mm').format(date)),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                      onTap: () => controller.loadSession(session['id']),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
   Widget _buildTypingIndicator() {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(right: 48, bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.cardBg,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
           ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildDot(0),
-            const SizedBox(width: 4),
-            _buildDot(1),
-            const SizedBox(width: 4),
-            _buildDot(2),
-          ],
-        ),
+        child: const AnimatedTypingDots(),
       ),
     );
   }
+}
 
-  Widget _buildDot(int index) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 600 + (index * 200)),
-      builder: (context, value, child) {
-        return Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: AppColors.textHint.withValues(alpha: 0.3 + (value * 0.5)),
-            shape: BoxShape.circle,
-          ),
+class AnimatedTypingDots extends StatefulWidget {
+  const AnimatedTypingDots({super.key});
+
+  @override
+  State<AnimatedTypingDots> createState() => _AnimatedTypingDotsState();
+}
+
+class _AnimatedTypingDotsState extends State<AnimatedTypingDots>
+    with TickerProviderStateMixin {
+  late List<AnimationController> _controllers;
+  late List<Animation<double>> _animations;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(3, (index) {
+      return AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 600),
+      );
+    });
+
+    _animations = _controllers.map((controller) {
+      return Tween<double>(begin: 0, end: -8).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+      );
+    }).toList();
+
+    _startAnimations();
+  }
+
+  void _startAnimations() async {
+    for (int i = 0; i < 3; i++) {
+      await Future.delayed(const Duration(milliseconds: 150));
+      if (mounted) {
+        _controllers[i].repeat(reverse: true);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _animations[index],
+          builder: (context, child) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              transform: Matrix4.translationValues(0, _animations[index].value, 0),
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(
+                  0.3 + (1 - (_animations[index].value.abs() / 8)) * 0.7,
+                ),
+                shape: BoxShape.circle,
+              ),
+            );
+          },
         );
-      },
+      }),
     );
   }
 }

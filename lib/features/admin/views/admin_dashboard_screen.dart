@@ -20,10 +20,6 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.white),
-          onPressed: () {},
-        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -36,7 +32,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
             Text(
               'Admin - Kota Surabaya',
               style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.white.withValues(alpha: 0.7),
+                color: AppColors.white.withOpacity(0.7),
               ),
             ),
           ],
@@ -120,7 +116,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                   Get.toNamed(AppRoutes.interventionForm);
                   break;
                 case 4:
-                  // Profile
+                  Get.toNamed(AppRoutes.profile);
                   break;
               }
             },
@@ -230,7 +226,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
             color: AppColors.successLight,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.2),
+              color: AppColors.primary.withOpacity(0.2),
             ),
           ),
           child: Stack(
@@ -246,7 +242,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.danger.withValues(alpha: 0.4),
+                        color: AppColors.danger.withOpacity(0.4),
                         blurRadius: 20,
                         spreadRadius: 8,
                       ),
@@ -264,7 +260,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.warning.withValues(alpha: 0.4),
+                        color: AppColors.warning.withOpacity(0.4),
                         blurRadius: 15,
                         spreadRadius: 5,
                       ),

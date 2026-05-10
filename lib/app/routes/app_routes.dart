@@ -1,6 +1,9 @@
 abstract class AppRoutes {
   static const String roleSelection = '/';
   static const String activation = '/activation';
+  static const String login = '/login';
+  static const String petugasLogin = '/petugas/login';
+  static const String register = '/register';
   static const String consentGps = '/consent-gps';
   static const String patientDashboard = '/patient/dashboard';
   static const String articleList = '/patient/articles';
@@ -13,4 +16,5 @@ abstract class AppRoutes {
   static const String tracingTimeline = '/admin/tracing';
   static const String tracingDetail = '/admin/tracing/detail';
   static const String interventionForm = '/admin/intervention';
+  static const String profile = '/profile';
 }

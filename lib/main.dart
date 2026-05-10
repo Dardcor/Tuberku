@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app/config/app_colors.dart';
 import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
 import 'app/bindings/initial_binding.dart';
 import 'core/services/supabase_service.dart';
 import 'core/services/gemini_service.dart';
@@ -13,6 +15,9 @@ import 'core/services/rss_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load env
+  await dotenv.load(fileName: ".env");
 
   // Init local storage
   await GetStorage.init();
@@ -27,11 +32,31 @@ void main() async {
   await Get.putAsync(() => NotificationService().init());
   await Get.putAsync(() => RssService().init());
 
-  runApp(const TuberkuApp());
+  // Check existing session for permanent login
+  final supabase = Get.find<SupabaseService>();
+  String initialRoute = AppPages.initial;
+
+  if (supabase.currentUser != null) {
+    try {
+      final profile = await supabase.getProfile(supabase.currentUser!.id);
+      if (profile != null) {
+        if (profile.role == 'admin' || profile.role == 'petugas') {
+          initialRoute = AppRoutes.adminDashboard;
+        } else {
+          initialRoute = AppRoutes.patientDashboard;
+        }
+      }
+    } catch (_) {
+      // If error fetching profile, stay on login/role selection
+    }
+  }
+
+  runApp(TuberkuApp(initialRoute: initialRoute));
 }
 
 class TuberkuApp extends StatelessWidget {
-  const TuberkuApp({super.key});
+  final String initialRoute;
+  const TuberkuApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +64,7 @@ class TuberkuApp extends StatelessWidget {
       title: 'Tuberku',
       debugShowCheckedModeBanner: false,
       initialBinding: InitialBinding(),
-      initialRoute: AppPages.initial,
+      initialRoute: initialRoute,
       getPages: AppPages.routes,
       theme: ThemeData(
         useMaterial3: true,

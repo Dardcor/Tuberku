@@ -5,6 +5,7 @@ import '../../../app/config/app_text_styles.dart';
 import '../../../app/config/app_constants.dart';
 import '../controllers/auth_controller.dart';
 import '../widgets/role_button.dart';
+import '../../../app/routes/app_routes.dart';
 
 class RoleSelectionScreen extends GetView<AuthController> {
   const RoleSelectionScreen({super.key});
@@ -23,10 +24,10 @@ class RoleSelectionScreen extends GetView<AuthController> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.monitor_heart_outlined,
-                    size: 72,
-                    color: AppColors.white,
+                  Image.asset(
+                    AppConstants.logoPath,
+                    height: 100,
+                    width: 100,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -100,7 +101,7 @@ class RoleSelectionScreen extends GetView<AuthController> {
                       RoleButton(
                         text: 'MASUK SEBAGAI PASIEN',
                         icon: Icons.person,
-                        onPressed: controller.navigateToActivation,
+                        onPressed: () => Get.toNamed(AppRoutes.login),
                       ),
                       const SizedBox(height: 16),
                       // Admin Button
@@ -108,7 +109,7 @@ class RoleSelectionScreen extends GetView<AuthController> {
                         text: 'MASUK SEBAGAI PETUGAS',
                         icon: Icons.grid_view,
                         isPrimary: false,
-                        onPressed: controller.navigateToAdminDashboard,
+                        onPressed: () => Get.toNamed(AppRoutes.petugasLogin),
                       ),
                       const SizedBox(height: 32),
                       // Quick Links
@@ -154,10 +155,14 @@ class RoleSelectionScreen extends GetView<AuthController> {
                       const SizedBox(height: 32),
                       // Register Link
                       Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            // Future: navigate to register
-                          },
+                        child: TextButton(
+                          onPressed: () => Get.toNamed('/register'),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                          ),
                           child: RichText(
                             text: TextSpan(
                               text: 'Belum punya akun? ',

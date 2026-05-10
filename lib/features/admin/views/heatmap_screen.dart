@@ -39,18 +39,42 @@ class HeatmapScreen extends GetView<HeatmapController> {
         return Stack(
           children: [
             // Google Maps
-            Obx(() => GoogleMap(
-                  initialCameraPosition: const CameraPosition(
-                    target: LatLng(-7.2575, 112.7521),
-                    zoom: 11,
-                  ),
-                  markers: controller.markers.toSet(),
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  mapToolbarEnabled: false,
-                  zoomControlsEnabled: false,
-                  onMapCreated: controller.onMapCreated,
-                )),
+            GoogleMap(
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(-7.2575, 112.7521),
+                zoom: 11,
+              ),
+              markers: controller.markers.toSet(),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              mapToolbarEnabled: false,
+              zoomControlsEnabled: false,
+              style: '''
+[
+  {
+    "featureType": "poi",
+    "stylers": [{ "visibility": "off" }]
+  },
+  {
+    "featureType": "poi.medical",
+    "stylers": [{ "visibility": "on" }]
+  },
+  {
+    "featureType": "poi.business",
+    "stylers": [{ "visibility": "off" }]
+  },
+  {
+    "featureType": "poi.business.pharmacy",
+    "stylers": [{ "visibility": "on" }]
+  },
+  {
+    "featureType": "poi.government",
+    "stylers": [{ "visibility": "off" }]
+  }
+]
+''',
+              onMapCreated: controller.onMapCreated,
+            ),
             // Filter pills
             Positioned(
               top: 12,
@@ -58,39 +82,39 @@ class HeatmapScreen extends GetView<HeatmapController> {
               right: 0,
               child: SizedBox(
                 height: 40,
-                child: Obx(() => ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: controller.filters.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
-                        final filter = controller.filters[index];
-                        final isSelected =
-                            controller.selectedFilter.value == filter;
-                        return FilterChip(
-                          label: Text(filter),
-                          selected: isSelected,
-                          onSelected: (_) => controller.setFilter(filter),
-                          selectedColor: AppColors.primary,
-                          backgroundColor: AppColors.cardBg,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? AppColors.white
-                                : AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13,
-                          ),
-                          side: BorderSide(
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.border,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        );
-                      },
-                    )),
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.filters.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final filter = controller.filters[index];
+                    final isSelected =
+                        controller.selectedFilter.value == filter;
+                    return FilterChip(
+                      label: Text(filter),
+                      selected: isSelected,
+                      onSelected: (_) => controller.setFilter(filter),
+                      selectedColor: AppColors.primary,
+                      backgroundColor: AppColors.cardBg,
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? AppColors.white
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.border,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             // Legend
@@ -111,18 +135,18 @@ class HeatmapScreen extends GetView<HeatmapController> {
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Obx(() => Text(
-                      '${controller.markers.length} pasien',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    )),
+                child: Text(
+                  '${controller.markers.length} pasien',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
               ),
             ),
           ],

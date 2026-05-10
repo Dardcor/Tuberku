@@ -1,9 +1,11 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class SupabaseConfig {
   SupabaseConfig._();
 
-  // GANTI DENGAN KREDENSIAL SUPABASE ANDA
-  static const String supabaseUrl = 'https://YOUR_PROJECT.supabase.co';
-  static const String supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+  // Membaca kredensial dari .env
+  static String get supabaseUrl => dotenv.env['SUPABASE_URL'] ?? 'https://YOUR_PROJECT.supabase.co';
+  static String get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? 'YOUR_SUPABASE_ANON_KEY';
 
   // Table Names
   static const String profilesTable = 'profiles';

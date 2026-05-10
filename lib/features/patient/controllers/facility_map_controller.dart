@@ -89,14 +89,19 @@ class FacilityMapController extends GetxController {
     final newMarkers = <Marker>{};
 
     for (final facility in filteredFacilities) {
+      final isApotek = facility.type.toLowerCase().contains('apotek') || 
+                       facility.name.toLowerCase().contains('apotek');
+      
       newMarkers.add(
         Marker(
           markerId: MarkerId(facility.id),
           position: LatLng(facility.latitude, facility.longitude),
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            facility.hasStock
-                ? BitmapDescriptor.hueGreen
-                : BitmapDescriptor.hueRed,
+            isApotek 
+                ? BitmapDescriptor.hueAzure // Blue for Pharmacies
+                : (facility.hasStock
+                    ? BitmapDescriptor.hueGreen // Green for Medical with stock
+                    : BitmapDescriptor.hueRed), // Red for Medical without stock
           ),
           infoWindow: InfoWindow(
             title: facility.name,
@@ -116,6 +121,35 @@ class FacilityMapController extends GetxController {
 
   void onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    _fitMarkers();
+  }
+
+  void _fitMarkers() {
+    if (markers.isEmpty || mapController == null) return;
+
+    List<LatLng> points = markers.map((m) => m.position).toList();
+    if (userPosition.value != null) {
+      points.add(LatLng(userPosition.value!.latitude, userPosition.value!.longitude));
+    }
+
+    if (points.isEmpty) return;
+
+    LatLngBounds bounds = _boundsFromLatLngList(points);
+    mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+  }
+
+  LatLngBounds _boundsFromLatLngList(List<LatLng> list) {
+    double? minLat, maxLat, minLng, maxLng;
+    for (final latLng in list) {
+      if (minLat == null || latLng.latitude < minLat) minLat = latLng.latitude;
+      if (maxLat == null || latLng.latitude > maxLat) maxLat = latLng.latitude;
+      if (minLng == null || latLng.longitude < minLng) minLng = latLng.longitude;
+      if (maxLng == null || latLng.longitude > maxLng) maxLng = latLng.longitude;
+    }
+    return LatLngBounds(
+      southwest: LatLng(minLat!, minLng!),
+      northeast: LatLng(maxLat!, maxLng!),
+    );
   }
 
   LatLng get initialCameraPosition {
@@ -125,8 +159,16 @@ class FacilityMapController extends GetxController {
         userPosition.value!.longitude,
       );
     }
-    // Default: Surabaya
-    return const LatLng(-7.2575, 112.7521);
+    
+    if (filteredFacilities.isNotEmpty) {
+      return LatLng(
+        filteredFacilities.first.latitude,
+        filteredFacilities.first.longitude,
+      );
+    }
+    
+    // Default: Bandung center
+    return const LatLng(-6.9175, 107.6191);
   }
 
   Future<void> refresh() async {

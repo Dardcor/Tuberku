@@ -3,22 +3,24 @@ class AppConstants {
 
   static const String appName = 'Tuberku';
   static const String appTagline = 'Pantau & Basmi TB Bersama';
+  static const String logoPath = 'assets/logo.png';
 
   // RSS Feed
   static const String rssFeedUrl = 'https://upk.kemkes.go.id/new/rss-feed';
   static const int rssCacheDurationHours = 6;
 
   // Gemini
-  static const String geminiModel = 'gemini-1.5-flash';
+  static const String geminiModel = 'gemini-2.5-flash';
   static const String geminiSystemPrompt =
       'Kamu adalah Tuberku AI, asisten kesehatan untuk pasien Tuberkulosis '
       '(TBC) di Indonesia. Jawab pertanyaan dalam Bahasa Indonesia yang '
-      'sederhana dan mudah dipahami. Fokus pada topik: gejala TBC, efek '
-      'samping obat TBC (Rifampicin, Isoniazid, FDC), cara pencegahan '
-      'penularan, etika batuk, dan informasi program DOTS. Selalu akhiri '
-      'jawaban dengan mencantumkan sumber referensi dari Kemenkes RI atau '
-      'WHO jika relevan. Jangan memberikan diagnosis medis. Sarankan selalu '
-      'berkonsultasi dengan dokter untuk kondisi serius.';
+      'sederhana dan mudah dipahami. JANGAN gunakan format markdown seperti '
+      'tanda bintang (**), pagar (#), atau list markdown. Gunakan teks polos '
+      'saja dengan penomoran manual jika diperlukan. Fokus pada topik: '
+      'gejala TBC, efek samping obat TBC (Rifampicin, Isoniazid, FDC), cara '
+      'pencegahan penularan, etika batuk, dan informasi program DOTS. Selalu '
+      'akhiri jawaban dengan mencantumkan sumber referensi dari Kemenkes RI '
+      'atau WHO jika relevan. Jangan memberikan diagnosis medis.';
 
   // Quick Questions
   static const List<String> quickQuestions = [
@@ -43,8 +45,10 @@ class AppConstants {
   static const String stockHabis = 'habis';
 
   // Roles
-  static const String rolePasien = 'pasien';
+  static const String rolePasien = 'patient';
   static const String roleAdmin = 'admin';
+  static const String rolePetugas = 'petugas';
+  static const String roleUmum = 'umum';
 
   // Storage Keys
   static const String storageKeyToken = 'auth_token';

@@ -8,10 +8,12 @@ import '../../core/services/rss_service.dart';
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(SupabaseService(), permanent: true);
-    Get.put(GeminiService(), permanent: true);
-    Get.put(LocationService(), permanent: true);
-    Get.put(NotificationService(), permanent: true);
-    Get.put(RssService(), permanent: true);
+    // Services are already initialized in main.dart via putAsync
+    // We just ensure they are available in the global scope if needed
+    Get.find<SupabaseService>();
+    Get.find<GeminiService>();
+    Get.find<LocationService>();
+    Get.find<NotificationService>();
+    Get.find<RssService>();
   }
 }
