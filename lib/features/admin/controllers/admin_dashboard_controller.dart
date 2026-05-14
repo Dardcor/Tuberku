@@ -8,13 +8,12 @@ class AdminDashboardController extends GetxController {
 
   final isLoading = true.obs;
   final hasError = false.obs;
-  final currentTabIndex = 0.obs;
 
   // Stats
   final activePatients = 0.obs;
   final redZoneCount = 0.obs;
   final activeTracingCount = 0.obs;
-  final totalInterventions = 0.obs;
+  final kepatuhanPercentage = 79.obs; // Dummy data as requested
 
   // Data
   final patients = <PatientModel>[].obs;
@@ -35,7 +34,6 @@ class AdminDashboardController extends GetxController {
         _supabase.countActivePatients(),
         _supabase.countPatientsByZone('merah'),
         _supabase.getRecentTracingLogs(days: 7),
-        _supabase.countInterventionLogs(),
         _supabase.getActivePatients(),
       ]);
 
@@ -46,8 +44,9 @@ class AdminDashboardController extends GetxController {
       recentTracing.assignAll(tracingList);
       activeTracingCount.value = tracingList.length;
 
-      totalInterventions.value = results[3] as int;
-      patients.assignAll(results[4] as List<PatientModel>);
+      patients.assignAll(results[3] as List<PatientModel>);
+      
+      // Keep kepatuhan at 79% for now
     } catch (_) {
       hasError.value = true;
     } finally {
@@ -57,9 +56,5 @@ class AdminDashboardController extends GetxController {
 
   Future<void> refresh() async {
     await _loadData();
-  }
-
-  void changeTab(int index) {
-    currentTabIndex.value = index;
   }
 }

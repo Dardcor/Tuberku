@@ -10,9 +10,17 @@ class HeatmapController extends GetxController {
   final hasError = false.obs;
   final patients = <PatientModel>[].obs;
   final markers = <Marker>{}.obs;
-  final selectedFilter = 'Semua'.obs;
 
-  final filters = ['Semua', 'Zona Merah', 'Zona Kuning', 'Zona Hijau'];
+  // Bottom Sheet Data
+  final selectedDistrict = 'Genteng'.obs;
+  final districts = ['Genteng', 'Wonokromo', 'Gubeng'].obs;
+  
+  // Dummy data for presentation
+  final districtStats = {
+    'Genteng': {'active': 14, 'adherence': 68, 'tracing': 3},
+    'Wonokromo': {'active': 21, 'adherence': 82, 'tracing': 5},
+    'Gubeng': {'active': 8, 'adherence': 91, 'tracing': 1},
+  }.obs;
 
   GoogleMapController? mapController;
 
@@ -37,62 +45,39 @@ class HeatmapController extends GetxController {
     }
   }
 
-  void setFilter(String filter) {
-    selectedFilter.value = filter;
-    _buildMarkers();
+  void setDistrict(String district) {
+    selectedDistrict.value = district;
+    // Animate map to district center could be added here
   }
 
   void _buildMarkers() {
     final newMarkers = <Marker>{};
-    var filtered = patients.toList();
+    
+    // Default location (Surabaya)
+    final centerLat = -7.250445;
+    final centerLng = 112.768845;
 
-    switch (selectedFilter.value) {
-      case 'Zona Merah':
-        filtered = filtered.where((p) => p.zone == 'merah').toList();
-        break;
-      case 'Zona Kuning':
-        filtered = filtered.where((p) => p.zone == 'kuning').toList();
-        break;
-      case 'Zona Hijau':
-        filtered = filtered.where((p) => p.zone == 'hijau').toList();
-        break;
-    }
-
-    for (final patient in filtered) {
-      if (patient.domicileLat == null || patient.domicileLng == null) continue;
-
-      final hue = _getMarkerHue(patient.zone);
-      newMarkers.add(
-        Marker(
-          markerId: MarkerId(patient.id),
-          position: LatLng(patient.domicileLat!, patient.domicileLng!),
-          icon: BitmapDescriptor.defaultMarkerWithHue(hue),
-          infoWindow: InfoWindow(
-            title: 'Pasien ${patient.id.substring(0, 8)}',
-            snippet: 'Zona: ${patient.zone ?? "-"}',
-          ),
-        ),
-      );
-    }
+    // Create dummy markers for presentation based on the image
+    newMarkers.add(_createCustomMarker('m1', centerLat + 0.01, centerLng - 0.01, '14', BitmapDescriptor.hueRed));
+    newMarkers.add(_createCustomMarker('m2', centerLat - 0.02, centerLng + 0.01, '7', BitmapDescriptor.hueYellow));
+    newMarkers.add(_createCustomMarker('m3', centerLat + 0.03, centerLng + 0.02, '3', BitmapDescriptor.hueGreen));
+    newMarkers.add(_createCustomMarker('m4', centerLat - 0.01, centerLng + 0.03, '9', BitmapDescriptor.hueGreen));
 
     markers.assignAll(newMarkers);
   }
 
-  double _getMarkerHue(String? zone) {
-    switch (zone) {
-      case 'merah':
-        return BitmapDescriptor.hueRed;
-      case 'kuning':
-        return BitmapDescriptor.hueYellow;
-      case 'hijau':
-        return BitmapDescriptor.hueGreen;
-      default:
-        return BitmapDescriptor.hueOrange;
-    }
+  Marker _createCustomMarker(String id, double lat, double lng, String count, double hue) {
+    return Marker(
+      markerId: MarkerId(id),
+      position: LatLng(lat, lng),
+      icon: BitmapDescriptor.defaultMarkerWithHue(hue),
+      infoWindow: InfoWindow(title: '$count Kasus'),
+    );
   }
 
   void onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    // Set map style if needed
   }
 
   Future<void> refresh() async {

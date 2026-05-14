@@ -23,6 +23,7 @@ import '../../features/admin/views/tracing_detail_screen.dart';
 import '../../features/admin/views/intervention_form_screen.dart';
 import '../../features/profile/views/profile_screen.dart';
 import '../../features/profile/bindings/profile_binding.dart';
+import '../../features/admin/views/main_admin_screen.dart';
 
 class AppPages {
   AppPages._();
@@ -89,7 +90,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.adminDashboard,
-      page: () => const AdminDashboardScreen(),
+      page: () => const MainAdminScreen(),
       binding: AdminBinding(),
     ),
     GetPage(

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tb_care/core/models/tracing_model.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/routes/app_routes.dart';
 import '../../../core/widgets/loading_shimmer.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../controllers/admin_dashboard_controller.dart';
+import '../controllers/main_admin_controller.dart';
 import '../widgets/stat_mini_card.dart';
-import 'package:intl/intl.dart';
 
 class AdminDashboardScreen extends GetView<AdminDashboardController> {
   const AdminDashboardScreen({super.key});
@@ -92,68 +93,11 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                 const SizedBox(height: 24),
                 _buildTracingSection(),
                 const SizedBox(height: 24),
-                _buildQuickActions(context),
-                const SizedBox(height: 24),
               ],
             ),
           ),
         );
       }),
-      bottomNavigationBar: Obx(() => BottomNavigationBar(
-            currentIndex: controller.currentTabIndex.value,
-            onTap: (index) {
-              switch (index) {
-                case 0:
-                  controller.changeTab(0);
-                  break;
-                case 1:
-                  Get.toNamed(AppRoutes.heatmap);
-                  break;
-                case 2:
-                  Get.toNamed(AppRoutes.tracingTimeline);
-                  break;
-                case 3:
-                  Get.toNamed(AppRoutes.interventionForm);
-                  break;
-                case 4:
-                  Get.toNamed(AppRoutes.profile);
-                  break;
-              }
-            },
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: AppColors.textSecondary,
-            backgroundColor: AppColors.cardBg,
-            selectedFontSize: 11,
-            unselectedFontSize: 11,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard_outlined),
-                activeIcon: Icon(Icons.dashboard),
-                label: 'Dashboard',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.map_outlined),
-                activeIcon: Icon(Icons.map),
-                label: 'Peta',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.timeline_outlined),
-                activeIcon: Icon(Icons.timeline),
-                label: 'Tracing',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.assignment_outlined),
-                activeIcon: Icon(Icons.assignment),
-                label: 'Intervensi',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline),
-                activeIcon: Icon(Icons.person),
-                label: 'Profil',
-              ),
-            ],
-          )),
     );
   }
 
@@ -169,30 +113,59 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
             StatMiniCard(
               title: 'Kasus Aktif',
               value: '${controller.activePatients.value}',
-              icon: Icons.people,
-              iconColor: AppColors.primary,
+              icon: Icons.settings_outlined,
+              iconColor: AppColors.danger,
+              subtitle: '+12 mgg ini',
             ),
             StatMiniCard(
-              title: 'Zona Merah',
-              value: '${controller.redZoneCount.value}',
-              icon: Icons.warning_amber,
-              iconColor: AppColors.danger,
-              badge: 'CRITICAL',
-              badgeColor: AppColors.danger,
+              title: 'Kepatuhan',
+              value: '',
+              icon: Icons.verified_user_outlined,
+              iconColor: AppColors.primary,
+              subtitle: 'Rata-rata',
+              customValueWidget: SizedBox(
+                height: 48,
+                width: 48,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: CircularProgressIndicator(
+                        value: controller.kepatuhanPercentage.value / 100,
+                        backgroundColor: Colors.grey.shade200,
+                        color: AppColors.success,
+                        strokeWidth: 4,
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        '${controller.kepatuhanPercentage.value}%',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             StatMiniCard(
               title: 'Tracing Aktif',
               value: '${controller.activeTracingCount.value}',
-              icon: Icons.person_search,
-              iconColor: AppColors.warning,
+              icon: Icons.person_search_outlined,
+              iconColor: AppColors.danger,
               badge: 'PRIORITY',
-              badgeColor: AppColors.warning,
+              badgeColor: AppColors.danger,
+              subtitle: 'kasus kontak',
             ),
             StatMiniCard(
-              title: 'Total Intervensi',
-              value: '${controller.totalInterventions.value}',
-              icon: Icons.assignment_turned_in,
-              iconColor: AppColors.success,
+              title: 'Zona Merah',
+              value: '${controller.redZoneCount.value}',
+              icon: Icons.warning_amber_rounded,
+              iconColor: AppColors.danger,
+              badge: 'CRITICAL',
+              badgeColor: AppColors.danger,
+              subtitle: 'kecamatan',
             ),
           ],
         ));
@@ -207,78 +180,128 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
           children: [
             Text('Persebaran Kasus', style: AppTextStyles.titleLarge),
             TextButton(
-              onPressed: () => Get.toNamed(AppRoutes.heatmap),
-              child: Text(
-                'Lihat Peta',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+              onPressed: () {
+                Get.find<MainAdminController>().changeTab(1); // Go to Heatmap Tab
+              },
+              child: Row(
+                children: [
+                  Text(
+                    'Fullscreen',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward, size: 16, color: AppColors.primary),
+                ],
               ),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Container(
-          height: 160,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: AppColors.successLight,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.primary.withOpacity(0.2),
+        GestureDetector(
+          onTap: () => Get.find<MainAdminController>().changeTab(1),
+          child: Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.successLight.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.2),
+              ),
             ),
-          ),
-          child: Stack(
-            children: [
-              // Mock map heatspots
-              Positioned(
-                top: 35,
-                left: 55,
-                child: Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.danger.withOpacity(0.4),
-                        blurRadius: 20,
-                        spreadRadius: 8,
+            child: Stack(
+              children: [
+                // Mock map background pattern or color
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Opacity(
+                      opacity: 0.1,
+                      child: Image.asset(
+                        'assets/images/map_placeholder.png', // Assuming we have or just use an icon
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.map,
+                          size: 100,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 25,
-                right: 70,
-                child: Container(
-                  width: 35,
-                  height: 35,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.warning.withOpacity(0.4),
-                        blurRadius: 15,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
+                // Mock map heatspots
+                Positioned(
+                  top: 80,
+                  left: 140,
+                  child: _buildHeatSpot('14', AppColors.danger),
                 ),
-              ),
-              const Center(
-                child: Icon(
-                  Icons.map,
-                  size: 56,
-                  color: AppColors.primary,
+                Positioned(
+                  bottom: 40,
+                  right: 80,
+                  child: _buildHeatSpot('7', AppColors.warning),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 20,
+                  left: 90,
+                  child: _buildHeatSpot('9', AppColors.success),
+                ),
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHeatSpot(String count, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.4),
+            blurRadius: 20,
+            spreadRadius: 15,
+          ),
+          BoxShadow(
+            color: color.withValues(alpha: 0.2),
+            blurRadius: 40,
+            spreadRadius: 30,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                count,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+          const Icon(Icons.arrow_drop_down, color: Colors.white, size: 24, shadows: [
+            Shadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1))
+          ]),
+        ],
+      ),
     );
   }
 
@@ -305,103 +328,18 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
         const SizedBox(height: 8),
         Obx(() {
           if (controller.recentTracing.isEmpty) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Center(
-                child: Text(
-                  'Belum ada data tracing',
-                  style: AppTextStyles.bodyMedium,
-                ),
-              ),
+            // Mock data for UI presentation based on the image
+            return Column(
+              children: [
+                _buildTracingCard('Gubeng, SBY'),
+                _buildTracingCard('Wonokromo, SBY'),
+              ],
             );
           }
 
           return Column(
             children: controller.recentTracing.take(2).map((tracing) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.successLight,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.person_search,
-                        color: AppColors.primary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tracing.tracingRef ?? tracing.id.substring(0, 8),
-                            style: AppTextStyles.titleMedium.copyWith(
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on,
-                                size: 12,
-                                color: AppColors.textHint,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  tracing.placeName ?? '-',
-                                  style: AppTextStyles.bodySmall,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    OutlinedButton(
-                      onPressed: () {
-                        Get.toNamed(
-                          AppRoutes.tracingDetail,
-                          arguments: tracing,
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.warning,
-                        side: const BorderSide(color: AppColors.warning),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text('Detail', style: TextStyle(fontSize: 12)),
-                    ),
-                  ],
-                ),
-              );
+              return _buildTracingCard(tracing.placeName ?? 'Unknown Location', tracing: tracing);
             }).toList(),
           );
         }),
@@ -409,84 +347,81 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
     );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Aksi Cepat', style: AppTextStyles.titleLarge),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionButton(
-                Icons.person_add,
-                'Tambah\nPasien',
-                AppColors.primary,
-                () => Get.toNamed(AppRoutes.interventionForm),
-              ),
+  Widget _buildTracingCard(String location, {TracingModel? tracing}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionButton(
-                Icons.warning_amber_rounded,
-                'Tandai\nZona',
-                AppColors.danger,
-                () => Get.toNamed(AppRoutes.interventionForm),
-              ),
+            child: const Icon(
+              Icons.route_outlined,
+              color: AppColors.textPrimary,
+              size: 24,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildActionButton(
-                Icons.message_outlined,
-                'Kirim\nPesan',
-                AppColors.warning,
-                () => Get.toNamed(AppRoutes.interventionForm),
-              ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 16,
+                  color: AppColors.textPrimary,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    location,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton(
-    IconData icon,
-    String label,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+          ),
+          OutlinedButton(
+            onPressed: () {
+              if (tracing != null) {
+                Get.toNamed(AppRoutes.tracingDetail, arguments: tracing);
+              }
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(color: Colors.grey.shade300),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: color, size: 24),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
+            child: Text(
+              'Detail',
               style: AppTextStyles.bodySmall.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
-                height: 1.3,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+

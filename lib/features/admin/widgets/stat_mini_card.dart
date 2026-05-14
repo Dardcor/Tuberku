@@ -10,6 +10,8 @@ class StatMiniCard extends StatelessWidget {
   final Color iconColor;
   final String? badge;
   final Color? badgeColor;
+  final String? subtitle;
+  final Widget? customValueWidget;
 
   const StatMiniCard({
     super.key,
@@ -19,6 +21,8 @@ class StatMiniCard extends StatelessWidget {
     this.iconColor = AppColors.primary,
     this.badge,
     this.badgeColor,
+    this.subtitle,
+    this.customValueWidget,
   });
 
   @override
@@ -30,56 +34,65 @@ class StatMiniCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w500,
+              Row(
+                children: [
+                  Icon(icon, size: 16, color: AppColors.textSecondary),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+              if (badge != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeColor ?? AppColors.danger,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                child: Icon(icon, size: 16, color: iconColor),
-              ),
             ],
           ),
           const Spacer(),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                value,
-                style: AppTextStyles.headlineMedium.copyWith(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+              if (customValueWidget != null)
+                customValueWidget!
+              else
+                Text(
+                  value,
+                  style: AppTextStyles.headlineMedium.copyWith(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: iconColor,
+                  ),
                 ),
-              ),
-              if (badge != null) ...[
+              if (subtitle != null) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  margin: const EdgeInsets.only(bottom: 4),
-                  decoration: BoxDecoration(
-                    color: (badgeColor ?? AppColors.danger).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                Expanded(
                   child: Text(
-                    badge!,
-                    style: TextStyle(
-                      color: badgeColor ?? AppColors.danger,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
+                    subtitle!,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
