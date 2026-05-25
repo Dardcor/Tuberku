@@ -28,7 +28,7 @@ class StatMiniCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(14),
       child: Stack(
         children: [
           Column(
