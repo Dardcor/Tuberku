@@ -7,9 +7,6 @@ class FacilityModel {
   final double longitude;
   final String? phone;
   final Map<String, dynamic>? openingHours;
-  final String? rifampicinStatus;
-  final String? isoniazidStatus;
-  final String? fdcStatus;
   final DateTime? updatedAt;
   double? distanceKm;
 
@@ -22,9 +19,6 @@ class FacilityModel {
     required this.longitude,
     this.phone,
     this.openingHours,
-    this.rifampicinStatus,
-    this.isoniazidStatus,
-    this.fdcStatus,
     this.updatedAt,
     this.distanceKm,
   });
@@ -39,19 +33,10 @@ class FacilityModel {
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0,
       phone: json['phone'] as String?,
       openingHours: json['opening_hours'] as Map<String, dynamic>?,
-      rifampicinStatus: json['rifampicin_status'] as String?,
-      isoniazidStatus: json['isoniazid_status'] as String?,
-      fdcStatus: json['fdc_status'] as String?,
       updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'] as String)
           : null,
     );
-  }
-
-  bool get hasStock {
-    return rifampicinStatus == 'tersedia' ||
-        isoniazidStatus == 'tersedia' ||
-        fdcStatus == 'tersedia';
   }
 
   String get formattedDistance {

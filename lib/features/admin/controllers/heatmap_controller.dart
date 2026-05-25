@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/services/supabase_service.dart';
@@ -38,7 +39,8 @@ class HeatmapController extends GetxController {
       final result = await _supabase.getActivePatients();
       patients.assignAll(result);
       _buildMarkers();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[HeatmapController] loadData error: $e');
       hasError.value = true;
     } finally {
       isLoading.value = false;

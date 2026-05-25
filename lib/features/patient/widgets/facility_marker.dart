@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../app/config/app_colors.dart';
-import '../../../core/widgets/status_badge.dart';
 
 class FacilityMarker extends StatelessWidget {
   final String name;
   final String distance;
-  final bool hasStock;
   final VoidCallback? onTap;
 
   const FacilityMarker({
     super.key,
     required this.name,
     required this.distance,
-    required this.hasStock,
     this.onTap,
   });
 
@@ -32,14 +29,12 @@ class FacilityMarker extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: hasStock
-                    ? AppColors.successLight
-                    : AppColors.dangerLight,
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.local_pharmacy,
-                color: hasStock ? AppColors.success : AppColors.danger,
+                color: AppColors.primary,
                 size: 20,
               ),
             ),
@@ -79,13 +74,10 @@ class FacilityMarker extends StatelessWidget {
                 ],
               ),
             ),
-            StatusBadge(
-              text: hasStock ? 'Tersedia' : 'Habis',
-              type: hasStock ? BadgeType.green : BadgeType.red,
-            ),
           ],
         ),
       ),
     );
   }
 }
+

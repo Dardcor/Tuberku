@@ -35,26 +35,26 @@ class StatusBadge extends StatelessWidget {
   Color get _backgroundColor {
     switch (type) {
       case BadgeType.red:
-        return AppColors.badgeRedBg;
+        return AppColors.dangerLight;
       case BadgeType.yellow:
-        return AppColors.badgeYellowBg;
+        return AppColors.warningLight;
       case BadgeType.green:
-        return AppColors.badgeGreenBg;
+        return AppColors.successLight;
       case BadgeType.blue:
-        return AppColors.badgeBlueBg;
+        return AppColors.primary.withValues(alpha: 0.1);
     }
   }
 
   Color get _textColor {
     switch (type) {
       case BadgeType.red:
-        return AppColors.badgeRedText;
+        return AppColors.danger;
       case BadgeType.yellow:
-        return AppColors.badgeYellowText;
+        return AppColors.warning;
       case BadgeType.green:
-        return AppColors.badgeGreenText;
+        return AppColors.success;
       case BadgeType.blue:
-        return AppColors.badgeBlueText;
+        return AppColors.primary;
     }
   }
 }

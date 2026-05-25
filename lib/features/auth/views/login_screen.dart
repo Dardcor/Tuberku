@@ -50,9 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.user != null) {
-        // Fetch profile to determine role
         final profile = await supabase.getProfile(response.user!.id);
-        
+
         if (mounted) {
           Get.snackbar(
             'Berhasil!',
@@ -62,8 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
             colorText: Colors.green.shade900,
           );
 
-          // Redirect based on role
-          if (profile?.role == 'admin' || profile?.role == 'petugas') {
+          // Route berdasarkan role: petugas ke admin, selainnya ke patient
+          if (profile?.role == 'petugas') {
             Get.offAllNamed(AppRoutes.adminDashboard);
           } else {
             Get.offAllNamed(AppRoutes.patientDashboard);
@@ -72,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       String errorMessage = 'Email atau password salah';
-      
+
       if (e.toString().contains('Invalid login credentials')) {
         errorMessage = 'Email atau password yang Anda masukkan salah.';
       } else if (e.toString().contains('network_error') || e.toString().contains('SocketException')) {
@@ -249,38 +248,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   Center(
-                    child: Column(
-                      children: [
-                        TextButton(
-                          onPressed: () => Get.toNamed(AppRoutes.register),
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Belum punya akun? ',
-                              style: AppTextStyles.bodyMedium,
-                              children: [
-                                TextSpan(
-                                  text: 'Daftar di sini',
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                    child: TextButton.icon(
+                      onPressed: () => Get.toNamed(AppRoutes.activation),
+                      icon: const Icon(Icons.verified_user_outlined, color: AppColors.primary),
+                      label: Text(
+                        'Aktivasi Akun Pasien Baru',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: () => Get.toNamed(AppRoutes.activation),
-                          child: Text(
-                            'Punya Kode Aktivasi Pasien?',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textHint,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ],

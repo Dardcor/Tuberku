@@ -78,6 +78,17 @@ class ActivationScreen extends GetView<AuthController> {
               }),
             ),
             const SizedBox(height: 24),
+            // Email
+            TextFormField(
+              controller: controller.emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'Alamat Email',
+                hintText: 'Contoh: email@anda.com',
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+            ),
+            const SizedBox(height: 16),
             // Phone number
             TextFormField(
               controller: controller.phoneController,
@@ -88,12 +99,31 @@ class ActivationScreen extends GetView<AuthController> {
                 prefixIcon: Icon(Icons.phone_outlined),
               ),
             ),
+            const SizedBox(height: 16),
+            // Password
+            Obx(() => TextFormField(
+                  controller: controller.passwordController,
+                  obscureText: controller.isObscure.value,
+                  decoration: InputDecoration(
+                    labelText: 'Buat Password Baru',
+                    hintText: 'Minimal 6 karakter',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isObscure.value
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                      onPressed: () => controller.isObscure.toggle(),
+                    ),
+                  ),
+                )),
             const SizedBox(height: 32),
             Obx(() => AppButton(
-                  text: 'AKTIVASI AKUN',
+                  text: 'AKTIVASI & BUAT AKUN',
                   onPressed: controller.activateAccount,
                   isLoading: controller.isActivating.value,
-                  icon: Icons.verified_outlined,
+                  icon: Icons.verified_user_outlined,
                 )),
           ],
         ),

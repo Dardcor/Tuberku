@@ -143,14 +143,14 @@ class ProfileScreen extends GetView<ProfileController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.accent.withOpacity(0.2),
+              color: AppColors.secondary.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.accent.withOpacity(0.5)),
+              border: Border.all(color: AppColors.secondary.withOpacity(0.5)),
             ),
             child: Text(
               (profile?.role ?? 'User').toUpperCase(),
               style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.accent,
+                color: AppColors.secondary,
                 fontWeight: FontWeight.bold,
               ),
             ),

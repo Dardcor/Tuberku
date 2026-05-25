@@ -68,11 +68,11 @@ class ZoneBadge extends StatelessWidget {
   Color get _textColor {
     switch (zone) {
       case 'merah':
-        return AppColors.badgeRedText;
+        return AppColors.danger;
       case 'kuning':
-        return AppColors.badgeYellowText;
+        return AppColors.warning;
       case 'hijau':
-        return AppColors.badgeGreenText;
+        return AppColors.success;
       default:
         return AppColors.textSecondary;
     }

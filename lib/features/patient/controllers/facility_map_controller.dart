@@ -16,7 +16,7 @@ class FacilityMapController extends GetxController {
   final selectedFilter = 'Terdekat'.obs;
   final hasError = false.obs;
 
-  final filters = ['Terdekat', 'Rifampicin', 'Isoniazid', 'FDC'];
+  final filters = ['Terdekat', 'Puskesmas', 'Klinik', 'Apotek'];
 
   final Rx<Position?> userPosition = Rx<Position?>(null);
   final Rx<FacilityModel?> selectedFacility = Rx<FacilityModel?>(null);
@@ -65,16 +65,16 @@ class FacilityMapController extends GetxController {
     var result = facilities.toList();
 
     switch (selectedFilter.value) {
-      case 'Rifampicin':
+      case 'Puskesmas':
         result =
-            result.where((f) => f.rifampicinStatus == 'tersedia').toList();
+            result.where((f) => f.type.toLowerCase().contains('puskesmas')).toList();
         break;
-      case 'Isoniazid':
+      case 'Klinik':
         result =
-            result.where((f) => f.isoniazidStatus == 'tersedia').toList();
+            result.where((f) => f.type.toLowerCase().contains('klinik')).toList();
         break;
-      case 'FDC':
-        result = result.where((f) => f.fdcStatus == 'tersedia').toList();
+      case 'Apotek':
+        result = result.where((f) => f.type.toLowerCase().contains('apotek')).toList();
         break;
       case 'Terdekat':
       default:
@@ -99,9 +99,7 @@ class FacilityMapController extends GetxController {
           icon: BitmapDescriptor.defaultMarkerWithHue(
             isApotek 
                 ? BitmapDescriptor.hueAzure // Blue for Pharmacies
-                : (facility.hasStock
-                    ? BitmapDescriptor.hueGreen // Green for Medical with stock
-                    : BitmapDescriptor.hueRed), // Red for Medical without stock
+                : BitmapDescriptor.hueGreen // Green for Medical
           ),
           infoWindow: InfoWindow(
             title: facility.name,

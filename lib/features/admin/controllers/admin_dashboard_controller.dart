@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/patient_model.dart';
@@ -46,7 +47,8 @@ class AdminDashboardController extends GetxController {
       patients.assignAll(results[3] as List<PatientModel>);
       
       // Keep kepatuhan at 79% for now
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[AdminDashboardController] loadData error: $e');
       hasError.value = true;
     } finally {
       isLoading.value = false;

@@ -99,11 +99,23 @@ class AuthController extends GetxController {
   Future<void> activateAccount() async {
     final code = fullCode;
     final phone = phoneController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
     if (code.length != 6) {
       Get.snackbar(
         'Error',
         'Masukkan 6 digit kode aktivasi',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+      );
+      return;
+    }
+
+    if (email.isEmpty || !GetUtils.isEmail(email)) {
+      Get.snackbar(
+        'Error',
+        'Masukkan alamat email yang valid',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
       );
@@ -120,13 +132,19 @@ class AuthController extends GetxController {
       return;
     }
 
+    if (password.length < 6) {
+      Get.snackbar(
+        'Error',
+        'Password minimal 6 karakter',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+      );
+      return;
+    }
+
     isActivating.value = true;
 
     try {
-      // Create auth user with phone as email-like identifier
-      final email = '$phone@tuberku.local';
-      final password = code;
-      
       String? userId;
 
       try {
@@ -137,7 +155,7 @@ class AuthController extends GetxController {
 
         if (authResponse.user != null) {
           userId = authResponse.user!.id;
-          // Create profile
+          // Update profile with correct phone
           await _supabase.upsertProfile(UserModel(
             id: userId,
             role: AppConstants.rolePasien,
@@ -146,29 +164,42 @@ class AuthController extends GetxController {
             createdAt: DateTime.now(),
           ));
         }
-      } catch (_) {
-        // User might already exist, try sign in
-        final signInResponse = await _supabase.signIn(email: email, password: password);
-        userId = signInResponse.user?.id;
+      } catch (e) {
+        if (e.toString().contains('already registered') || e.toString().contains('User already exists')) {
+          // If already exists, attempt login instead of failing
+          final signInResponse = await _supabase.signIn(email: email, password: password);
+          userId = signInResponse.user?.id;
+        } else {
+          rethrow;
+        }
       }
       
       if (userId != null) {
-          // Activate patient record using new RPC
+          // Activate patient record using RPC
           final success = await _supabase.activatePatient(code, userId);
           
           if (!success) {
-            Get.snackbar('Error', 'Gagal mengaktifkan pasien atau kode tidak valid');
+            Get.snackbar('Error', 'Gagal mengaktifkan pasien. Kode tidak valid atau sudah digunakan.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.shade100);
             return;
           }
           
+          Get.snackbar('Berhasil', 'Akun berhasil diaktivasi. Anda sekarang masuk sebagai pasien.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.shade100);
+            
           Get.offAllNamed(AppRoutes.consentGps);
       } else {
-         Get.snackbar('Error', 'Gagal membuat akun');
+         Get.snackbar('Error', 'Gagal membuat kredensial akun.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.shade100);
       }
     } catch (e) {
+      debugPrint('[AuthController] activateAccount error: $e');
       Get.snackbar(
         'Error',
-        'Terjadi kesalahan. Coba lagi nanti.',
+        'Terjadi kesalahan saat aktivasi. Pastikan email belum pernah digunakan.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100,
       );
@@ -212,9 +243,5 @@ class AuthController extends GetxController {
 
   void navigateToAdminDashboard() {
     Get.offAllNamed(AppRoutes.adminDashboard);
-  }
-
-  void navigateToRegister() {
-    Get.toNamed(AppRoutes.register);
   }
 }

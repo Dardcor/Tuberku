@@ -81,7 +81,7 @@ class TracingDetailScreen extends GetView<TracingController> {
                     child: const Text(
                       'PRIORITY',
                       style: TextStyle(
-                        color: AppColors.badgeRedText,
+                        color: AppColors.danger,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -163,63 +163,6 @@ class TracingDetailScreen extends GetView<TracingController> {
                       }).toList(),
                     );
                   }),
-                  const SizedBox(height: 24),
-                  // Action Card
-                  AppCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tindak Lanjut',
-                          style: AppTextStyles.titleMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.message, size: 16),
-                                label: const Text('Kirim Pesan'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.primary,
-                                  side: const BorderSide(
-                                    color: AppColors.primary,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.warning, size: 16),
-                                label: const Text('Tandai Zona'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.danger,
-                                  side: const BorderSide(
-                                    color: AppColors.danger,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        AppButton(
-                          text: 'Catat Kunjungan',
-                          icon: Icons.note_add,
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 16),
                 ],
               ),

@@ -28,14 +28,6 @@ class NotificationService extends GetxService {
     return this;
   }
 
-  Future<void> subscribeToTopic(String topic) async {
-    await _messaging.subscribeToTopic(topic);
-  }
-
-  Future<void> unsubscribeFromTopic(String topic) async {
-    await _messaging.unsubscribeFromTopic(topic);
-  }
-
   Future<String?> getToken() async {
     return await _messaging.getToken();
   }

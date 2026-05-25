@@ -167,7 +167,7 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
           Row(
             children: [
               const Icon(Icons.wb_sunny_outlined,
-                  color: AppColors.accent, size: 20),
+                  color: AppColors.secondary, size: 20),
               const SizedBox(width: 8),
               Obx(() => Text(
                     'Halo, ${controller.userName.value.isNotEmpty ? controller.userName.value : 'Pasien'}!',

@@ -82,7 +82,7 @@ class ChatBubble extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.badgeGreenBg,
+                        color: AppColors.successLight,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -90,7 +90,7 @@ class ChatBubble extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.badgeGreenText,
+                          color: AppColors.success,
                         ),
                       ),
                     ),

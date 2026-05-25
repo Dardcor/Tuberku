@@ -28,79 +28,88 @@ class StatMiniCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(10),
+      child: Stack(
         children: [
-          // Baris atas: Icon + Title + Badge
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: 14, color: AppColors.textSecondary),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                    fontSize: 10,
+              // Baris atas: Icon + Title
+              Row(
+                children: [
+                  Icon(icon, size: 14, color: AppColors.textSecondary),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        fontSize: 10,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Baris bawah: Value + Subtitle
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (customValueWidget != null)
+                    customValueWidget!
+                  else
+                    Text(
+                      value,
+                      style: AppTextStyles.headlineMedium.copyWith(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: iconColor,
+                        height: 1,
+                      ),
+                    ),
+                  if (subtitle != null) ...[
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        subtitle!,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 9,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              // Tambahkan jarak bawah jika ada badge, agar tidak overlap
+              if (badge != null) const SizedBox(height: 14),
+            ],
+          ),
+          if (badge != null)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: badgeColor ?? AppColors.danger,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  badge!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 7,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              if (badge != null) ...[
-                const SizedBox(width: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: badgeColor ?? AppColors.danger,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    badge!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 8),
-          // Baris bawah: Value + Subtitle
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (customValueWidget != null)
-                customValueWidget!
-              else
-                Text(
-                  value,
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: iconColor,
-                  ),
-                ),
-              if (subtitle != null) ...[
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    subtitle!,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                      fontSize: 9,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ],
-          ),
+            ),
         ],
       ),
     );

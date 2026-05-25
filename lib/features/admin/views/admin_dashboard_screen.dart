@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tb_care/core/models/tracing_model.dart';
+import '../../../core/models/tracing_model.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/routes/app_routes.dart';
@@ -25,7 +25,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'TB-Control Center',
+              'Tuberku',
               style: AppTextStyles.titleMedium.copyWith(
                 color: AppColors.white,
               ),
@@ -102,40 +102,45 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
   }
 
   Widget _buildStatsGrid() {
-    return Obx(() => GridView.count(
-          crossAxisCount: 3, // Ubah ke 3 kolom
-          crossAxisSpacing: 8, // Sedikit diperkecil agar cukup
-          mainAxisSpacing: 8,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 0.9, // Disesuaikan agar kotak tidak terlalu tinggi
-          children: [
-            StatMiniCard(
-              title: 'Kasus Aktif',
-              value: '${controller.activePatients.value}',
-              icon: Icons.settings_outlined,
-              iconColor: AppColors.danger,
-              subtitle: '+12 mgg ini',
-            ),
-            StatMiniCard(
-              title: 'Tracing',
-              value: '${controller.activeTracingCount.value}',
-              icon: Icons.person_search_outlined,
-              iconColor: AppColors.danger,
-              badge: 'CRITICAL',
-              badgeColor: AppColors.danger,
-              subtitle: 'kontak',
-            ),
-            StatMiniCard(
-              title: 'Zona Merah',
-              value: '${controller.redZoneCount.value}',
-              icon: Icons.warning_amber_rounded,
-              iconColor: AppColors.danger,
-              badge: 'CRITICAL',
-              badgeColor: AppColors.danger,
-              subtitle: 'kecamatan',
-            ),
-          ],
+    return Obx(() => IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: StatMiniCard(
+                  title: 'Kasus Aktif',
+                  value: '${controller.activePatients.value}',
+                  icon: Icons.settings_outlined,
+                  iconColor: AppColors.danger,
+                  subtitle: '+12 mgg ini',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: StatMiniCard(
+                  title: 'Tracing',
+                  value: '${controller.activeTracingCount.value}',
+                  icon: Icons.person_search_outlined,
+                  iconColor: AppColors.danger,
+                  badge: 'CRITICAL',
+                  badgeColor: AppColors.danger,
+                  subtitle: 'kontak',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: StatMiniCard(
+                  title: 'Zona Merah',
+                  value: '${controller.redZoneCount.value}',
+                  icon: Icons.warning_amber_rounded,
+                  iconColor: AppColors.danger,
+                  badge: 'CRITICAL',
+                  badgeColor: AppColors.danger,
+                  subtitle: 'kecamatan',
+                ),
+              ),
+            ],
+          ),
         ));
   }
 

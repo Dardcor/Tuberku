@@ -196,7 +196,6 @@ class FacilityMapScreen extends GetView<FacilityMapController> {
                                   return FacilityMarker(
                                     name: facility.name,
                                     distance: facility.formattedDistance,
-                                    hasStock: facility.hasStock,
                                     onTap: () {
                                       Get.toNamed(
                                         AppRoutes.facilityDetail,

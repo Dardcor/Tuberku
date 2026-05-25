@@ -40,15 +40,9 @@ class AppConstants {
   static const String facilityPuskesmas = 'puskesmas';
   static const String facilityKlinik = 'klinik';
 
-  // Stock Status
-  static const String stockTersedia = 'tersedia';
-  static const String stockHabis = 'habis';
-
-  // Roles
+  // Roles (hanya 2: pasien dan petugas)
   static const String rolePasien = 'patient';
-  static const String roleAdmin = 'admin';
   static const String rolePetugas = 'petugas';
-  static const String roleUmum = 'umum';
 
   // Storage Keys
   static const String storageKeyToken = 'auth_token';
@@ -56,9 +50,4 @@ class AppConstants {
   static const String storageKeyChatHistory = 'chat_history';
   static const String storageKeyRssCache = 'rss_cache';
   static const String storageKeyRssCacheTime = 'rss_cache_time';
-
-  // Intervention types
-  static const String interventionPesan = 'pesan';
-  static const String interventionZona = 'zona';
-  static const String interventionKunjungan = 'kunjungan';
 }
