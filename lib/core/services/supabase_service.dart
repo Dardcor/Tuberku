@@ -87,14 +87,12 @@ class SupabaseService extends GetxService {
     return data.map((e) => PatientModel.fromJson(e)).toList();
   }
 
-  Future<PatientModel?> activatePatient(String code) async {
-    final data = await _client
-        .from(SupabaseConfig.patientsTable)
-        .select()
-        .eq('activation_code', code)
-        .maybeSingle();
-    if (data == null) return null;
-    return PatientModel.fromJson(data);
+  Future<bool> activatePatient(String code, String profileId) async {
+    final bool success = await _client.rpc('activate_patient', params: {
+      'p_code': code,
+      'p_profile_id': profileId,
+    });
+    return success;
   }
 
   Future<void> updateGpsConsent(String patientId, {required bool consent}) async {

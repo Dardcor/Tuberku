@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/config/app_constants.dart';
@@ -24,7 +25,7 @@ class RoleSelectionScreen extends GetView<AuthController> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
+                  SvgPicture.asset(
                     AppConstants.logoPath,
                     height: 100,
                     width: 100,
@@ -42,7 +43,7 @@ class RoleSelectionScreen extends GetView<AuthController> {
                   Text(
                     AppConstants.appTagline,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.accent,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

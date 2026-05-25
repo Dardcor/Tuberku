@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/config/app_constants.dart';
@@ -121,7 +122,7 @@ class _PetugasLoginScreenState extends State<PetugasLoginScreen> {
                   constraints: const BoxConstraints(),
                 ),
                 const SizedBox(height: 16),
-                Image.asset(
+                SvgPicture.asset(
                   AppConstants.logoPath,
                   height: 60,
                 ),

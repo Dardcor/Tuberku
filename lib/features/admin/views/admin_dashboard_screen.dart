@@ -103,12 +103,12 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
 
   Widget _buildStatsGrid() {
     return Obx(() => GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          crossAxisCount: 3, // Ubah ke 3 kolom
+          crossAxisSpacing: 8, // Sedikit diperkecil agar cukup
+          mainAxisSpacing: 8,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.25,
+          childAspectRatio: 0.9, // Disesuaikan agar kotak tidak terlalu tinggi
           children: [
             StatMiniCard(
               title: 'Kasus Aktif',
@@ -118,45 +118,13 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
               subtitle: '+12 mgg ini',
             ),
             StatMiniCard(
-              title: 'Kepatuhan',
-              value: '',
-              icon: Icons.verified_user_outlined,
-              iconColor: AppColors.primary,
-              subtitle: 'Rata-rata',
-              customValueWidget: SizedBox(
-                height: 48,
-                width: 48,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: CircularProgressIndicator(
-                        value: controller.kepatuhanPercentage.value / 100,
-                        backgroundColor: Colors.grey.shade200,
-                        color: AppColors.success,
-                        strokeWidth: 4,
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        '${controller.kepatuhanPercentage.value}%',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            StatMiniCard(
-              title: 'Tracing Aktif',
+              title: 'Tracing',
               value: '${controller.activeTracingCount.value}',
               icon: Icons.person_search_outlined,
               iconColor: AppColors.danger,
-              badge: 'PRIORITY',
+              badge: 'CRITICAL',
               badgeColor: AppColors.danger,
-              subtitle: 'kasus kontak',
+              subtitle: 'kontak',
             ),
             StatMiniCard(
               title: 'Zona Merah',

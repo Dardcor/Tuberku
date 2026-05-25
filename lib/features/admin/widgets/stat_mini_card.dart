@@ -28,49 +28,51 @@ class StatMiniCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Baris atas: Icon + Title + Badge
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(icon, size: 16, color: AppColors.textSecondary),
-                  const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+              Icon(icon, size: 14, color: AppColors.textSecondary),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    fontSize: 10,
                   ),
-                ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              if (badge != null)
+              if (badge != null) ...[
+                const SizedBox(width: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   decoration: BoxDecoration(
                     color: badgeColor ?? AppColors.danger,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     badge!,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 8,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+              ],
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: 8),
+          // Baris bawah: Value + Subtitle
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (customValueWidget != null)
                 customValueWidget!
@@ -78,18 +80,19 @@ class StatMiniCard extends StatelessWidget {
                 Text(
                   value,
                   style: AppTextStyles.headlineMedium.copyWith(
-                    fontSize: 32,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: iconColor,
                   ),
                 ),
               if (subtitle != null) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     subtitle!,
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textSecondary,
+                      fontSize: 9,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

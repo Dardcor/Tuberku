@@ -179,7 +179,7 @@ class PatientDashboardScreen extends GetView<PatientDashboardController> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Jangan lupa minum obat hari ini. Tetap semangat!',
+            'Tetap jaga kesehatan dan semangat!',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.white.withOpacity(0.85),
             ),

@@ -13,7 +13,6 @@ class AdminDashboardController extends GetxController {
   final activePatients = 0.obs;
   final redZoneCount = 0.obs;
   final activeTracingCount = 0.obs;
-  final kepatuhanPercentage = 79.obs; // Dummy data as requested
 
   // Data
   final patients = <PatientModel>[].obs;

@@ -3,7 +3,7 @@ class AppConstants {
 
   static const String appName = 'Tuberku';
   static const String appTagline = 'Pantau & Basmi TB Bersama';
-  static const String logoPath = 'assets/logo.png';
+  static const String logoPath = 'assets/images/logo.svg';
 
   // RSS Feed
   static const String rssFeedUrl = 'https://upk.kemkes.go.id/new/rss-feed';

@@ -123,22 +123,11 @@ class AuthController extends GetxController {
     isActivating.value = true;
 
     try {
-      final patient = await _supabase.activatePatient(code);
-
-      if (patient == null) {
-        Get.snackbar(
-          'Gagal',
-          'Kode aktivasi tidak ditemukan. Hubungi petugas kesehatan Anda.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.shade100,
-        );
-        isActivating.value = false;
-        return;
-      }
-
       // Create auth user with phone as email-like identifier
       final email = '$phone@tuberku.local';
       final password = code;
+      
+      String? userId;
 
       try {
         final authResponse = await _supabase.signUp(
@@ -147,9 +136,10 @@ class AuthController extends GetxController {
         );
 
         if (authResponse.user != null) {
+          userId = authResponse.user!.id;
           // Create profile
           await _supabase.upsertProfile(UserModel(
-            id: authResponse.user!.id,
+            id: userId,
             role: AppConstants.rolePasien,
             fullName: '',
             phone: phone,
@@ -158,11 +148,23 @@ class AuthController extends GetxController {
         }
       } catch (_) {
         // User might already exist, try sign in
-        await _supabase.signIn(email: email, password: password);
+        final signInResponse = await _supabase.signIn(email: email, password: password);
+        userId = signInResponse.user?.id;
       }
-
-      currentPatient.value = patient;
-      Get.offAllNamed(AppRoutes.consentGps);
+      
+      if (userId != null) {
+          // Activate patient record using new RPC
+          final success = await _supabase.activatePatient(code, userId);
+          
+          if (!success) {
+            Get.snackbar('Error', 'Gagal mengaktifkan pasien atau kode tidak valid');
+            return;
+          }
+          
+          Get.offAllNamed(AppRoutes.consentGps);
+      } else {
+         Get.snackbar('Error', 'Gagal membuat akun');
+      }
     } catch (e) {
       Get.snackbar(
         'Error',
