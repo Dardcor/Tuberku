@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_button.dart';
 import '../controllers/add_patient_controller.dart';
 import '../controllers/main_admin_controller.dart';
 
@@ -13,15 +15,13 @@ class AddPatientScreen extends GetView<AddPatientController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.find<MainAdminController>().changeTab(0),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Tambah Pasien Baru',
-          style: AppTextStyles.titleMedium.copyWith(color: AppColors.textPrimary),
+          style: AppTextStyles.titleMedium.copyWith(color: AppColors.white),
         ),
       ),
       body: SingleChildScrollView(
@@ -100,11 +100,11 @@ class AddPatientScreen extends GetView<AddPatientController> {
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                   ),
@@ -154,42 +154,26 @@ class AddPatientScreen extends GetView<AddPatientController> {
       ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).padding.bottom + 16),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.background,
         ),
-        child: ElevatedButton(
+        child: Obx(() => AppButton(
+          text: 'SIMPAN DATA PASIEN',
+          icon: Icons.save_outlined,
+          isLoading: controller.isLoading.value,
           onPressed: controller.savePatient,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary, // Dark green
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          ),
-          child: Obx(() => controller.isLoading.value
-              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.save_outlined, size: 20),
-                    const SizedBox(width: 8),
-                    const Text('SIMPAN DATA PASIEN', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                  ],
-                )),
-        ),
+        )),
       ),
     );
   }
 
   Widget _buildSection({required String title, required IconData icon, required List<Widget> children}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: AppCard(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
+        padding: const EdgeInsets.all(16),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -213,7 +197,7 @@ class AddPatientScreen extends GetView<AddPatientController> {
           ...children,
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildField({
@@ -248,15 +232,15 @@ class AddPatientScreen extends GetView<AddPatientController> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               suffixIcon: suffixIcon,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.primary, width: 2),
               ),
             ),

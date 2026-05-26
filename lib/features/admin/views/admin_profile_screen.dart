@@ -16,9 +16,14 @@ class AdminProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profil Petugas'),
+        automaticallyImplyLeading: false,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          'Profil Petugas',
+          style: AppTextStyles.titleMedium.copyWith(color: AppColors.white),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),

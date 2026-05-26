@@ -87,7 +87,7 @@ class StatMiniCard extends StatelessWidget {
                 ],
               ),
               // Tambahkan jarak bawah jika ada badge, agar tidak overlap
-              if (badge != null) const SizedBox(height: 14),
+              if (badge != null) const SizedBox(height: 22),
             ],
           ),
           if (badge != null)
@@ -95,17 +95,18 @@ class StatMiniCard extends StatelessWidget {
               bottom: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 decoration: BoxDecoration(
                   color: badgeColor ?? AppColors.danger,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   badge!,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 7,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),

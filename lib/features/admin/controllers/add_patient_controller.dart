@@ -26,7 +26,7 @@ class AddPatientController extends GetxController {
 
   void _generatePatientId() {
     final random = Random().nextInt(9000) + 1000;
-    patientIdController.text = 'TB-2023-$random';
+    patientIdController.text = 'TB-${DateTime.now().year}-$random';
   }
 
   @override
@@ -56,10 +56,17 @@ class AddPatientController extends GetxController {
       // Save to Supabase
       await _supabase.client.from('patients').insert({
         'profile_id': null, // Will be set by patient during activation
+        'full_name': nameController.text.trim(),
+        'nik': nikController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'facility_name': selectedPuskesmas.value,
+        'district': 'Surabaya', // Default or extracted from form later
         'activation_code': activationCode,
         'address': '', // You might want to add field for this
         'diagnosis_date': dateController.text,
         'tb_type': 'BTA+', // Default or from UI
+        'zone': 'hijau', // Default initial zone
+        'is_active': true,
       });
       
       Get.defaultDialog(

@@ -21,6 +21,8 @@ import '../../features/admin/views/tracing_detail_screen.dart';
 import '../../features/profile/views/profile_screen.dart';
 import '../../features/profile/bindings/profile_binding.dart';
 import '../../features/admin/views/main_admin_screen.dart';
+import '../../features/admin/views/notification_screen.dart';
+import '../../features/admin/controllers/notification_controller.dart';
 
 class AppPages {
   AppPages._();
@@ -100,6 +102,13 @@ class AppPages {
       name: AppRoutes.tracingDetail,
       page: () => const TracingDetailScreen(),
       binding: AdminBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => const NotificationScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => NotificationController());
+      }),
     ),
     GetPage(
       name: AppRoutes.profile,

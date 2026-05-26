@@ -51,3 +51,7 @@ app.*.map.json
 
 # Android specific files
 android/app/google-services.json
+
+# AI Agents Knowledge Base
+AGENTS.md
+**/AGENTS.md

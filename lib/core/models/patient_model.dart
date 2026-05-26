@@ -1,6 +1,11 @@
 class PatientModel {
   final String id;
   final String? profileId;
+  final String? fullName;
+  final String? nik;
+  final String? phone;
+  final String? facilityName;
+  final String? district;
   final String? activationCode;
   final String? address;
   final double? domicileLat;
@@ -15,6 +20,11 @@ class PatientModel {
   const PatientModel({
     required this.id,
     this.profileId,
+    this.fullName,
+    this.nik,
+    this.phone,
+    this.facilityName,
+    this.district,
     this.activationCode,
     this.address,
     this.domicileLat,
@@ -31,6 +41,11 @@ class PatientModel {
     return PatientModel(
       id: json['id'] as String,
       profileId: json['profile_id'] as String?,
+      fullName: json['full_name'] as String?,
+      nik: json['nik'] as String?,
+      phone: json['phone'] as String?,
+      facilityName: json['facility_name'] as String?,
+      district: json['district'] as String?,
       activationCode: json['activation_code'] as String?,
       address: json['address'] as String?,
       domicileLat: (json['domicile_lat'] as num?)?.toDouble(),
@@ -52,6 +67,11 @@ class PatientModel {
     return {
       'id': id,
       'profile_id': profileId,
+      'full_name': fullName,
+      'nik': nik,
+      'phone': phone,
+      'facility_name': facilityName,
+      'district': district,
       'activation_code': activationCode,
       'address': address,
       'domicile_lat': domicileLat,

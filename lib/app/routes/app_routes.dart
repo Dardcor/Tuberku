@@ -14,5 +14,6 @@ abstract class AppRoutes {
   static const String heatmap = '/admin/heatmap';
   static const String tracingTimeline = '/admin/tracing';
   static const String tracingDetail = '/admin/tracing/detail';
+  static const String notifications = '/notifications';
   static const String profile = '/profile';
 }
