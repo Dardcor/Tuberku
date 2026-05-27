@@ -9,7 +9,7 @@ class AdminProfileController extends GetxController {
   final email = ''.obs;
   final role = 'Petugas Surveilans TBC'.obs;
   final facility = 'Puskesmas Surabaya'.obs;
-  final nip = 'NIP. 19850101 201001 1 001'.obs;
+  final nip = ''.obs;
 
   final supervisedPatients = 0.obs;
   final tracingsCompleted = 0.obs;
@@ -55,6 +55,12 @@ class AdminProfileController extends GetxController {
           role.value = profile.role.toUpperCase() == 'ADMIN' 
               ? 'Petugas Surveilans TBC' 
               : profile.role;
+        }
+
+        if (profile.nip != null && profile.nip!.isNotEmpty) {
+          nip.value = 'NIP. ${profile.nip}';
+        } else {
+          nip.value = ''; // Kosongkan jika belum diatur
         }
       } else {
         name.value = 'Petugas Tuberku';

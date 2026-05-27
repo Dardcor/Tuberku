@@ -12,10 +12,14 @@ create table if not exists public.profiles (
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Upgrade profiles
 do $$
 begin
-    if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='email') then
-        alter table public.profiles add column email text;
+    if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='facility_name') then
+        alter table public.profiles add column facility_name text;
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='nip') then
+        alter table public.profiles add column nip text;
     end if;
 end $$;
 
@@ -34,6 +38,26 @@ create table if not exists public.patients (
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+-- Upgrade patients
+do $$
+begin
+    if not exists (select 1 from information_schema.columns where table_name='patients' and column_name='full_name') then
+        alter table public.patients add column full_name text;
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name='patients' and column_name='nik') then
+        alter table public.patients add column nik text;
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name='patients' and column_name='phone') then
+        alter table public.patients add column phone text;
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name='patients' and column_name='facility_name') then
+        alter table public.patients add column facility_name text;
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name='patients' and column_name='district') then
+        alter table public.patients add column district text;
+    end if;
+end $$;
 
 create table if not exists public.tracing_logs (
     id uuid primary key default uuid_generate_v4(),
@@ -224,11 +248,11 @@ where not exists (select 1 from public.zones where name = 'Kecamatan Sukajadi');
 insert into public.zones (name, level, case_count, latitude, longitude)
 select 'Kecamatan Sumur Bandung', 'hijau', 3, -6.9147, 107.6098
 where not exists (select 1 from public.zones where name = 'Kecamatan Sumur Bandung');
+
 insert into public.facilities (name, type, address, latitude, longitude)
 select 'Apotek Kimia Farma Pasteur', 'Apotek', 'Jl. Pasteur No. 50', -6.8973, 107.5985
 where not exists (select 1 from public.facilities where name = 'Apotek Kimia Farma Pasteur');
 
--- Fungsi untuk aktivasi pasien
 create or replace function public.activate_patient(
     p_code text,
     p_profile_id uuid
@@ -237,7 +261,6 @@ returns boolean as $$
 declare
     v_patient_id uuid;
 begin
-    -- Cek apakah kode valid dan belum memiliki profile_id
     select id into v_patient_id 
     from public.patients 
     where activation_code = p_code 
@@ -247,10 +270,9 @@ begin
         return false;
     end if;
 
-    -- Kaitkan pasien dengan profile_id
     update public.patients
     set profile_id = p_profile_id,
-        activation_code = null -- Kode dihapus setelah berhasil dipakai
+        activation_code = null
     where id = v_patient_id;
 
     return true;
