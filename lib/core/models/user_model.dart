@@ -4,6 +4,8 @@ class UserModel {
   final String fullName;
   final String email;
   final String phone;
+  final String? facilityName;
+  final String? nip;
   final DateTime createdAt;
 
   const UserModel({
@@ -12,6 +14,8 @@ class UserModel {
     required this.fullName,
     this.email = '',
     required this.phone,
+    this.facilityName,
+    this.nip,
     required this.createdAt,
   });
 
@@ -22,6 +26,8 @@ class UserModel {
       fullName: (json['full_name'] ?? '').toString(),
       email: (json['email'] ?? '').toString(),
       phone: (json['phone'] ?? '').toString(),
+      facilityName: json['facility_name']?.toString(),
+      nip: json['nip']?.toString(),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
@@ -35,6 +41,8 @@ class UserModel {
       'full_name': fullName,
       'email': email,
       'phone': phone,
+      'facility_name': facilityName,
+      'nip': nip,
     };
   }
 }

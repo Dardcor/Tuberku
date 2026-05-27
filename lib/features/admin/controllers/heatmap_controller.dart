@@ -152,7 +152,26 @@ class HeatmapController extends GetxController {
 
   void onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    // Set map style if needed
+    
+    // Hilangkan semua label POI (Tempat umum) dan Transit agar peta bersih
+    const String mapStyle = '''
+    [
+      {
+        "featureType": "poi",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      },
+      {
+        "featureType": "transit",
+        "stylers": [
+          { "visibility": "off" }
+        ]
+      }
+    ]
+    ''';
+    
+    controller.setMapStyle(mapStyle);
   }
 
   Future<void> refresh() async {

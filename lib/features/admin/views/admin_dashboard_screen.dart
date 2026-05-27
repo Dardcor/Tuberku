@@ -177,6 +177,9 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                 zoomControlsEnabled: false,
                 mapToolbarEnabled: false,
                 myLocationButtonEnabled: false,
+                onMapCreated: (GoogleMapController mapController) {
+                  mapController.setMapStyle('[{"featureType": "poi","stylers": [{"visibility": "off"}]},{"featureType": "transit","stylers": [{"visibility": "off"}]}]');
+                },
                 onTap: (_) => Get.find<MainAdminController>().changeTab(1),
               )),
             ),
