@@ -1,8 +1,15 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/services/rss_service.dart';
 import '../../../core/models/article_model.dart';
-import '../../../core/models/user_model.dart';
+import '../views/patient_dashboard_content.dart';
+import '../views/facility_map_screen.dart';
+import '../views/article_list_screen.dart';
+import '../../profile/views/profile_screen.dart';
+import '../controllers/article_controller.dart';
+import '../controllers/facility_map_controller.dart';
+import '../../profile/controllers/profile_controller.dart';
 
 class PatientDashboardController extends GetxController {
   final _supabase = Get.find<SupabaseService>();
@@ -14,9 +21,21 @@ class PatientDashboardController extends GetxController {
   final currentTabIndex = 0.obs;
   final hasError = false.obs;
 
+  late final List<Widget> pages = [
+    const PatientDashboardContent(),
+    const FacilityMapScreen(),
+    const ArticleListScreen(),
+    const ProfileScreen(),
+  ];
+
   @override
   void onInit() {
     super.onInit();
+    // Initialize required controllers
+    Get.put(ProfileController());
+    Get.put(ArticleController());
+    Get.put(FacilityMapController());
+    
     _loadData();
   }
 

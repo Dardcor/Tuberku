@@ -1,9 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/patient_model.dart';
 import '../../../core/models/tracing_model.dart';
+import '../../../app/config/app_colors.dart';
 
 class AdminDashboardController extends GetxController {
   final _supabase = Get.find<SupabaseService>();
@@ -17,6 +18,13 @@ class AdminDashboardController extends GetxController {
   final yellowZoneCount = 0.obs;
   final greenZoneCount = 0.obs;
   final activeTracingCount = 0.obs;
+
+  // Getters for dynamic badges
+  String? get tracingBadge => activeTracingCount.value > 5 ? 'CRITICAL' : null;
+  Color? get tracingBadgeColor => activeTracingCount.value > 5 ? AppColors.danger : null;
+
+  String? get redZoneBadge => redZoneCount.value > 0 ? 'CRITICAL' : null;
+  Color? get redZoneBadgeColor => redZoneCount.value > 0 ? AppColors.danger : null;
 
   // Admin Info
   final adminName = 'Petugas'.obs;

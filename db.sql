@@ -21,6 +21,9 @@ begin
     if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='nip') then
         alter table public.profiles add column nip text;
     end if;
+    if not exists (select 1 from information_schema.columns where table_name='profiles' and column_name='role') then
+        alter table public.profiles add column role text check (role in ('patient', 'petugas')) default 'patient';
+    end if;
 end $$;
 
 create table if not exists public.patients (
@@ -131,6 +134,30 @@ begin
     end if;
     if not exists (select 1 from pg_policies where policyname = 'Patients can view their own data.') then
         create policy "Patients can view their own data." on public.patients for select using ( auth.uid() = profile_id );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Only petugas can insert patients.') then
+        create policy "Only petugas can insert patients." on public.patients for insert with check ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Only petugas can update patients.') then
+        create policy "Only petugas can update patients." on public.patients for update using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Only petugas can delete patients.') then
+        create policy "Only petugas can delete patients." on public.patients for delete using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Petugas can insert tracing logs.') then
+        create policy "Petugas can insert tracing logs." on public.tracing_logs for insert with check ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Petugas can view all tracing logs.') then
+        create policy "Petugas can view all tracing logs." on public.tracing_logs for select using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Petugas can update tracing logs.') then
+        create policy "Petugas can update tracing logs." on public.tracing_logs for update using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Petugas can delete tracing logs.') then
+        create policy "Petugas can delete tracing logs." on public.tracing_logs for delete using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Zones are viewable by everyone.') then
+        create policy "Zones are viewable by everyone." on public.zones for select using (true);
     end if;
     if not exists (select 1 from pg_policies where policyname = 'Anyone can insert a profile during registration.') then
         create policy "Anyone can insert a profile during registration." on public.profiles for insert with check (true);

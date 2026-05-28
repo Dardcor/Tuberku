@@ -89,6 +89,21 @@ class SupabaseService extends GetxService {
     }
   }
 
+  Future<PatientModel?> getPatientByProfileId(String profileId) async {
+    try {
+      final data = await _client
+          .from(SupabaseConfig.patientsTable)
+          .select()
+          .eq('profile_id', profileId)
+          .maybeSingle();
+      if (data == null) return null;
+      return PatientModel.fromJson(data);
+    } catch (e) {
+      debugPrint('[SupabaseService] getPatientByProfileId error: $e');
+      return null;
+    }
+  }
+
   Future<List<PatientModel>> getActivePatients() async {
     try {
       final data = await _client
@@ -137,6 +152,18 @@ class SupabaseService extends GetxService {
       return data.length;
     } catch (e) {
       debugPrint('[SupabaseService] countActivePatients error: $e');
+      return 0;
+    }
+  }
+
+  Future<int> countPatients() async {
+    try {
+      final data = await _client
+          .from(SupabaseConfig.patientsTable)
+          .select('id');
+      return data.length;
+    } catch (e) {
+      debugPrint('[SupabaseService] countPatients error: $e');
       return 0;
     }
   }

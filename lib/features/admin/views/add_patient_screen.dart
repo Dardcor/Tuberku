@@ -134,7 +134,7 @@ class AddPatientScreen extends GetView<AddPatientController> {
                           Text('Izin Pelacakan Lokasi', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 4),
                           Text(
-                            'Mengizinkan aplikasi mencatat lokasi saat pasien melakukan konfirmasi minum obat untuk validasi data.',
+                            'Mengizinkan aplikasi mencatat lokasi untuk pemantauan zonasi wilayah pasien.',
                             style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, height: 1.3),
                           ),
                         ],

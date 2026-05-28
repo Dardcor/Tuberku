@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/models/facility_model.dart';
@@ -34,20 +35,15 @@ class FacilityMapController extends GetxController {
     hasError.value = false;
 
     try {
-      // Get user location
       userPosition.value = await _location.getCurrentPosition();
-
-      // Get facilities from Supabase
       final result = await _supabase.getFacilities();
 
-      // Calculate distances if position available
       if (userPosition.value != null) {
         _location.getNearestFacilities(result, userPosition.value!);
       }
 
       facilities.assignAll(result);
       _applyFilter();
-      _buildMarkers();
     } catch (_) {
       hasError.value = true;
     } finally {
@@ -58,31 +54,43 @@ class FacilityMapController extends GetxController {
   void setFilter(String filter) {
     selectedFilter.value = filter;
     _applyFilter();
-    _buildMarkers();
   }
 
   void _applyFilter() {
     var result = facilities.toList();
 
+    // 1. Filter by proximity (within 50km) if user position is available
+    if (userPosition.value != null) {
+      result = result.where((f) {
+        final distance = Geolocator.distanceBetween(
+          userPosition.value!.latitude,
+          userPosition.value!.longitude,
+          f.latitude,
+          f.longitude,
+        );
+        return distance <= 50000; // 50km
+      }).toList();
+    }
+
+    // 2. Filter by type
     switch (selectedFilter.value) {
       case 'Puskesmas':
-        result =
-            result.where((f) => f.type.toLowerCase().contains('puskesmas')).toList();
+        result = result.where((f) => f.type.toLowerCase().contains('puskesmas')).toList();
         break;
       case 'Klinik':
-        result =
-            result.where((f) => f.type.toLowerCase().contains('klinik')).toList();
+        result = result.where((f) => f.type.toLowerCase().contains('klinik')).toList();
         break;
       case 'Apotek':
         result = result.where((f) => f.type.toLowerCase().contains('apotek')).toList();
         break;
       case 'Terdekat':
       default:
-        // Already sorted by distance
+        // Already sorted by distance in _loadData
         break;
     }
 
     filteredFacilities.assignAll(result);
+    _buildMarkers();
   }
 
   void _buildMarkers() {
@@ -98,8 +106,8 @@ class FacilityMapController extends GetxController {
           position: LatLng(facility.latitude, facility.longitude),
           icon: BitmapDescriptor.defaultMarkerWithHue(
             isApotek 
-                ? BitmapDescriptor.hueAzure // Blue for Pharmacies
-                : BitmapDescriptor.hueGreen // Green for Medical
+                ? BitmapDescriptor.hueAzure 
+                : BitmapDescriptor.hueGreen 
           ),
           infoWindow: InfoWindow(
             title: facility.name,
@@ -152,21 +160,14 @@ class FacilityMapController extends GetxController {
 
   LatLng get initialCameraPosition {
     if (userPosition.value != null) {
-      return LatLng(
-        userPosition.value!.latitude,
-        userPosition.value!.longitude,
-      );
+      return LatLng(userPosition.value!.latitude, userPosition.value!.longitude);
     }
     
     if (filteredFacilities.isNotEmpty) {
-      return LatLng(
-        filteredFacilities.first.latitude,
-        filteredFacilities.first.longitude,
-      );
+      return LatLng(filteredFacilities.first.latitude, filteredFacilities.first.longitude);
     }
     
-    // Default: Bandung center
-    return const LatLng(-6.9175, 107.6191);
+    return const LatLng(-7.250445, 112.768845);
   }
 
   Future<void> refresh() async {

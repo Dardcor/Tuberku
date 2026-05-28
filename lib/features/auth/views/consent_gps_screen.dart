@@ -18,89 +18,86 @@ class ConsentGpsScreen extends GetView<AuthController> {
         foregroundColor: AppColors.white,
       ),
       body: SafeArea(
-        child: Padding(
+        child: ListView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 16),
-              const Icon(
-                Icons.location_on_outlined,
-                size: 64,
-                color: AppColors.primary,
+          children: [
+            const SizedBox(height: 16),
+            const Icon(
+              Icons.location_on_outlined,
+              size: 64,
+              color: AppColors.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Izin Penggunaan Lokasi',
+              style: AppTextStyles.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Data lokasi Anda akan digunakan untuk:',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildBulletPoint(
+                    'Membantu petugas kesehatan memantau penyebaran TBC di wilayah Anda.',
+                  ),
+                  _buildBulletPoint(
+                    'Menampilkan apotek dan fasilitas kesehatan terdekat.',
+                  ),
+                  _buildBulletPoint(
+                    'Memberikan informasi zona rawan TBC di sekitar Anda.',
+                  ),
+                  _buildBulletPoint(
+                    'Data dienkripsi dan hanya diakses oleh petugas kesehatan yang berwenang.',
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text(
-                'Izin Penggunaan Lokasi',
-                style: AppTextStyles.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            const SizedBox(height: 24),
+            // Checkbox
+            Obx(() => Row(
                   children: [
-                    Text(
-                      'Data lokasi Anda akan digunakan untuk:',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Checkbox(
+                      value: controller.gpsConsent.value,
+                      onChanged: (val) {
+                        controller.gpsConsent.value = val ?? false;
+                      },
+                      activeColor: AppColors.primary,
                     ),
-                    const SizedBox(height: 16),
-                    _buildBulletPoint(
-                      'Membantu petugas kesehatan memantau penyebaran TBC di wilayah Anda.',
-                    ),
-                    _buildBulletPoint(
-                      'Menampilkan apotek dan fasilitas kesehatan terdekat.',
-                    ),
-                    _buildBulletPoint(
-                      'Memberikan informasi zona rawan TBC di sekitar Anda.',
-                    ),
-                    _buildBulletPoint(
-                      'Data dienkripsi dan hanya diakses oleh petugas kesehatan yang berwenang.',
-                    ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              // Checkbox
-              Obx(() => Row(
-                    children: [
-                      Checkbox(
-                        value: controller.gpsConsent.value,
-                        onChanged: (val) {
-                          controller.gpsConsent.value = val ?? false;
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          controller.gpsConsent.value =
+                              !controller.gpsConsent.value;
                         },
-                        activeColor: AppColors.primary,
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            controller.gpsConsent.value =
-                                !controller.gpsConsent.value;
-                          },
-                          child: Text(
-                            'Saya memahami dan menyetujui penggunaan data lokasi saya sesuai ketentuan di atas.',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
+                        child: Text(
+                          'Saya memahami dan menyetujui penggunaan data lokasi saya sesuai ketentuan di atas.',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ),
-                    ],
-                  )),
-              const SizedBox(height: 16),
-              Obx(() => AppButton(
-                    text: 'SAYA SETUJU & LANJUTKAN',
-                    onPressed: controller.gpsConsent.value
-                        ? controller.submitGpsConsent
-                        : null,
-                    isLoading: controller.isSubmittingConsent.value,
-                    icon: Icons.check_circle_outline,
-                  )),
-              const SizedBox(height: 16),
-            ],
-          ),
+                    ),
+                  ],
+                )),
+            const SizedBox(height: 16),
+            Obx(() => AppButton(
+                  text: 'SAYA SETUJU & LANJUTKAN',
+                  onPressed: controller.gpsConsent.value
+                      ? controller.submitGpsConsent
+                      : null,
+                  isLoading: controller.isSubmittingConsent.value,
+                  icon: Icons.check_circle_outline,
+                )),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );

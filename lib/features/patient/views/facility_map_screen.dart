@@ -15,11 +15,6 @@ class FacilityMapScreen extends GetView<FacilityMapController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Peta Fasilitas Kesehatan'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-      ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -47,8 +42,8 @@ class FacilityMapScreen extends GetView<FacilityMapController> {
                   zoom: 13,
                 ),
                 markers: controller.markers.toSet(),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
+                myLocationEnabled: false,
+                myLocationButtonEnabled: false,
                 mapToolbarEnabled: false,
                 zoomControlsEnabled: false,
                 style: '''
@@ -144,68 +139,82 @@ class FacilityMapScreen extends GetView<FacilityMapController> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    children: [
-                      // Handle
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.border,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: CustomScrollView(
+                    controller: scrollController,
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Column(
                           children: [
-                            Text(
-                              'Fasilitas Kesehatan',
-                              style: AppTextStyles.titleMedium,
+                            // Handle
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: AppColors.border,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
-                            Text(
-                              '${controller.filteredFacilities.length} lokasi',
-                              style: AppTextStyles.bodySmall,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Fasilitas Kesehatan',
+                                    style: AppTextStyles.titleMedium,
+                                  ),
+                                  Text(
+                                    '${controller.filteredFacilities.length} lokasi',
+                                    style: AppTextStyles.bodySmall,
+                                  ),
+                                ],
+                              ),
                             ),
+                            const Divider(),
                           ],
                         ),
                       ),
-                      const Divider(),
-                      Expanded(
-                        child: controller.filteredFacilities.isEmpty
-                            ? const Center(
-                                child: Text('Tidak ada fasilitas ditemukan'),
-                              )
-                            : ListView.separated(
-                                controller: scrollController,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                      controller.filteredFacilities.isEmpty
+                          ? const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: Text('Tidak ada fasilitas ditemukan'),
                                 ),
-                                itemCount: controller.filteredFacilities.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(width: 8),
-                                itemBuilder: (context, index) {
-                                  final facility =
-                                      controller.filteredFacilities[index];
-                                  return FacilityMarker(
-                                    name: facility.name,
-                                    distance: facility.formattedDistance,
-                                    onTap: () {
-                                      Get.toNamed(
-                                        AppRoutes.facilityDetail,
-                                        arguments: facility,
-                                      );
-                                    },
-                                  );
-                                },
                               ),
-                      ),
+                            )
+                          : SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final facility =
+                                        controller.filteredFacilities[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      child: FacilityMarker(
+                                        name: facility.name,
+                                        distance: facility.formattedDistance,
+                                        onTap: () {
+                                          Get.toNamed(
+                                            AppRoutes.facilityDetail,
+                                            arguments: facility,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  childCount: controller.filteredFacilities.length,
+                                ),
+                              ),
+                            ),
                     ],
                   ),
                 );

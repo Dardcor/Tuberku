@@ -23,6 +23,8 @@ import '../../features/profile/bindings/profile_binding.dart';
 import '../../features/admin/views/main_admin_screen.dart';
 import '../../features/admin/views/notification_screen.dart';
 import '../../features/admin/controllers/notification_controller.dart';
+import '../../features/patient/views/patient_notification_screen.dart';
+import '../../features/patient/controllers/patient_notification_controller.dart';
 
 class AppPages {
   AppPages._();
@@ -104,10 +106,17 @@ class AppPages {
       binding: AdminBinding(),
     ),
     GetPage(
-      name: AppRoutes.notifications,
+      name: AppRoutes.adminNotifications,
       page: () => const NotificationScreen(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => NotificationController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.patientNotifications,
+      page: () => const PatientNotificationScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => PatientNotificationController());
       }),
     ),
     GetPage(

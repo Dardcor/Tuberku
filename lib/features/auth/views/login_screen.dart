@@ -33,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
+      if (Get.isSnackbarOpen) return;
       Get.snackbar('Error', 'Email dan password wajib diisi',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.shade100);
@@ -53,6 +54,17 @@ class _LoginScreenState extends State<LoginScreen> {
         final profile = await supabase.getProfile(response.user!.id);
 
         if (mounted) {
+          if (profile?.role == 'petugas') {
+            await supabase.signOut();
+            Get.snackbar(
+              'Akses Ditolak',
+              'Akun Petugas tidak diizinkan masuk melalui portal Pasien.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.orange.shade100,
+            );
+            return;
+          }
+
           Get.snackbar(
             'Berhasil!',
             'Selamat datang kembali, ${profile?.fullName ?? 'User'}',
@@ -61,12 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
             colorText: Colors.green.shade900,
           );
 
-          // Route berdasarkan role: petugas ke admin, selainnya ke patient
-          if (profile?.role == 'petugas') {
-            Get.offAllNamed(AppRoutes.adminDashboard);
-          } else {
-            Get.offAllNamed(AppRoutes.patientDashboard);
-          }
+          Get.offAllNamed(AppRoutes.patientDashboard);
         }
       }
     } catch (e) {

@@ -24,9 +24,10 @@ class AddPatientController extends GetxController {
     _generatePatientId();
   }
 
-  void _generatePatientId() {
-    final random = Random().nextInt(9000) + 1000;
-    patientIdController.text = 'TB-${DateTime.now().year}-$random';
+  Future<void> _generatePatientId() async {
+    final count = await _supabase.countPatients();
+    final sequence = (count + 1).toString().padLeft(4, '0');
+    patientIdController.text = 'TB-${DateTime.now().year}-$sequence';
   }
 
   @override
@@ -41,6 +42,7 @@ class AddPatientController extends GetxController {
 
   Future<void> savePatient() async {
     if (nameController.text.isEmpty || nikController.text.isEmpty || phoneController.text.isEmpty) {
+      if (Get.isSnackbarOpen) return;
       Get.snackbar('Error', 'Harap lengkapi semua data wajib', 
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100);

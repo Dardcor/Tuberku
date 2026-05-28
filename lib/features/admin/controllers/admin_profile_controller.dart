@@ -7,8 +7,8 @@ class AdminProfileController extends GetxController {
 
   final name = 'Memuat...'.obs;
   final email = ''.obs;
-  final role = 'Petugas Surveilans TBC'.obs;
-  final facility = 'Puskesmas Surabaya'.obs;
+  final role = ''.obs;
+  final facility = ''.obs;
   final nip = ''.obs;
 
   final supervisedPatients = 0.obs;

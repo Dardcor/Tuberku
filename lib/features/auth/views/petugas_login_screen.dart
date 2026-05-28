@@ -44,6 +44,7 @@ class _PetugasLoginScreenState extends State<PetugasLoginScreen> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
+      if (Get.isSnackbarOpen) return;
       Get.snackbar('Error', 'Email dan password wajib diisi',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.shade100);
@@ -115,6 +116,7 @@ class _PetugasLoginScreenState extends State<PetugasLoginScreen> {
     final confirmPassword = _confirmPasswordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
+      if (Get.isSnackbarOpen) return;
       Get.snackbar('Error', 'Semua field wajib diisi',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.shade100);

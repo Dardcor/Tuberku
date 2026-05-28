@@ -86,7 +86,7 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
                         )),
                     const SizedBox(height: 4),
                     Obx(() => Text(
-                          controller.role.value,
+                          controller.role.value.isNotEmpty ? controller.role.value : 'Peran belum diatur',
                           style: AppTextStyles.bodySmall.copyWith(
                             color: Colors.white.withOpacity(0.9),
                             fontWeight: FontWeight.w500,
@@ -100,7 +100,7 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Obx(() => Text(
-                            controller.nip.value,
+                            controller.nip.value.isNotEmpty ? controller.nip.value : 'NIP belum diatur',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
@@ -127,7 +127,7 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Obx(() => Text(
-                        controller.facility.value,
+                        controller.facility.value.isNotEmpty ? controller.facility.value : 'Faskes belum diatur',
                         style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
                       )),
                 ),
@@ -211,25 +211,25 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
           _buildMenuItem(
             icon: Icons.notifications_active_outlined,
             title: 'Pengaturan Notifikasi',
-            onTap: () {},
+            onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _buildMenuItem(
             icon: Icons.lock_outline,
             title: 'Ganti Kata Sandi',
-            onTap: () {},
+            onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _buildMenuItem(
             icon: Icons.menu_book_outlined,
             title: 'Panduan Penggunaan',
-            onTap: () {},
+            onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _buildMenuItem(
             icon: Icons.headset_mic_outlined,
             title: 'Pusat Bantuan',
-            onTap: () {},
+            onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _buildMenuItem(
@@ -237,7 +237,33 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
             title: 'Keluar',
             color: AppColors.danger,
             hideArrow: true,
-            onTap: controller.logout,
+            onTap: _showLogoutDialog,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Keluar Akun'),
+        content: const Text('Apakah Anda yakin ingin keluar dari aplikasi Tuberku?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.logout();
+            },
+            child: const Text(
+              'Keluar',
+              style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -268,7 +294,10 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
         ),
       ),
       trailing: hideArrow ? null : const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
-      onTap: onTap,
+      onTap: () {
+        if (Get.isSnackbarOpen) return;
+        onTap();
+      },
     );
   }
 }

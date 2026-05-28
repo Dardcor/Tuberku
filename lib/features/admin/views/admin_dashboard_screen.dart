@@ -37,7 +37,7 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () => Get.toNamed(AppRoutes.notifications),
+            onPressed: () => Get.toNamed(AppRoutes.adminNotifications),
           ),
           const SizedBox(width: 8),
         ],
@@ -97,17 +97,17 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                   ),
                 ),
               const SizedBox(width: 8),
-              Expanded(
-                child: StatMiniCard(
-                  title: 'Tracing',
-                  value: '${controller.activeTracingCount.value}',
-                  icon: Icons.person_search_outlined,
-                  iconColor: AppColors.danger,
-                  badge: 'CRITICAL',
-                  badgeColor: AppColors.danger,
-                  subtitle: 'kontak',
+                Expanded(
+                  child: StatMiniCard(
+                    title: 'Tracing',
+                    value: '${controller.activeTracingCount.value}',
+                    icon: Icons.person_search_outlined,
+                    iconColor: AppColors.danger,
+                    badge: controller.tracingBadge,
+                    badgeColor: controller.tracingBadgeColor,
+                    subtitle: 'kontak',
+                  ),
                 ),
-              ),
               const SizedBox(width: 8),
               Expanded(
                 child: StatMiniCard(
@@ -115,8 +115,8 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
                   value: '${controller.redZoneCount.value}',
                   icon: Icons.warning_amber_rounded,
                   iconColor: AppColors.danger,
-                  badge: 'CRITICAL',
-                  badgeColor: AppColors.danger,
+                  badge: controller.redZoneBadge,
+                  badgeColor: controller.redZoneBadgeColor,
                   subtitle: 'kecamatan',
                 ),
               ),
