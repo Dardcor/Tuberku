@@ -26,11 +26,11 @@ class AiChatScreen extends GetView<AiController> {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: AppColors.accent,
+                color: AppColors.secondary,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.accent.withOpacity(0.5),
+                    color: AppColors.secondary.withOpacity(0.5),
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),
@@ -64,13 +64,13 @@ class AiChatScreen extends GetView<AiController> {
                 const Icon(
                   Icons.verified,
                   size: 14,
-                  color: AppColors.badgeGreenText,
+                  color: AppColors.success,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Jawaban dilengkapi sumber dari Kemenkes & WHO',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.badgeGreenText,
+                    color: AppColors.success,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../app/config/app_colors.dart';
@@ -52,62 +53,105 @@ class HeatmapScreen extends GetView<HeatmapController> {
               right: 16,
               child: Row(
                 children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        Get.find<MainAdminController>().changeTab(0);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const Text('Zona', style: TextStyle(fontWeight: FontWeight.w600)),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.arrow_drop_down, size: 20),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary, // Dark green
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text('Kecamatan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Obx(() => Row(
+                        children: [
+                          PopupMenuButton<String>(
+                            onSelected: controller.setZoneFilter,
+                            itemBuilder: (context) => ['Semua', 'Merah', 'Kuning', 'Hijau']
+                                .map((z) => PopupMenuItem(value: z, child: Text(z)))
+                                .toList(),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: controller.selectedZoneFilter.value == 'Semua' ? Colors.white : AppColors.primary,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    controller.selectedZoneFilter.value == 'Semua' ? 'Zona' : controller.selectedZoneFilter.value, 
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: controller.selectedZoneFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                    )
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down, 
+                                    size: 20,
+                                    color: controller.selectedZoneFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Text('Live', style: TextStyle(fontWeight: FontWeight.w600)),
-                      ],
+                          const SizedBox(width: 8),
+                          PopupMenuButton<String>(
+                            onSelected: controller.setDistrict,
+                            itemBuilder: (context) => controller.districts
+                                .map((d) => PopupMenuItem(value: d, child: Text(d)))
+                                .toList(),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: controller.selectedDistrict.value == 'Semua' ? Colors.white : AppColors.primary,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    controller.selectedDistrict.value == 'Semua' ? 'Kecamatan' : controller.selectedDistrict.value, 
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: controller.selectedDistrict.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                    )
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down, 
+                                    size: 20,
+                                    color: controller.selectedDistrict.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          PopupMenuButton<String>(
+                            onSelected: controller.setStatusFilter,
+                            itemBuilder: (context) => ['Semua', 'Aktif', 'Sembuh']
+                                .map((s) => PopupMenuItem(value: s, child: Text(s)))
+                                .toList(),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: controller.selectedStatusFilter.value == 'Semua' ? Colors.white : AppColors.primary,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    controller.selectedStatusFilter.value == 'Semua' ? 'Status Kasus' : controller.selectedStatusFilter.value, 
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: controller.selectedStatusFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                    )
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down, 
+                                    size: 20,
+                                    color: controller.selectedStatusFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )),
                     ),
                   ),
                 ],
@@ -230,7 +274,7 @@ class HeatmapScreen extends GetView<HeatmapController> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Obx(() {
-              final stats = controller.districtStats[controller.selectedDistrict.value] ?? {'active': 0, 'adherence': 0, 'tracing': 0};
+              final stats = controller.districtStats[controller.selectedDistrict.value] ?? {'active': 0, 'recovered': 0, 'tracing': 0};
               return Row(
                 children: [
                   Expanded(
@@ -238,7 +282,7 @@ class HeatmapScreen extends GetView<HeatmapController> {
                   ),
                   Container(height: 30, width: 1, color: Colors.grey.shade200),
                   Expanded(
-                    child: _buildStatItem('${stats['adherence']}%', 'Patuh Obat', AppColors.primary),
+                    child: _buildStatItem('${stats['recovered']}', 'Sembuh', AppColors.success),
                   ),
                   Container(height: 30, width: 1, color: Colors.grey.shade200),
                   Expanded(
@@ -250,28 +294,61 @@ class HeatmapScreen extends GetView<HeatmapController> {
           ),
           const Divider(height: 1),
           
-          // Patient List (Mock)
+          // Patient List
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _buildPatientItem(
-                  'P1',
-                  'Pasien 014 - ${controller.selectedDistrict.value}',
-                  'Risiko Tinggi • Mangkir 2 Hari',
-                  Colors.red.shade100,
-                  Colors.red.shade700,
-                ),
-                const SizedBox(height: 12),
-                _buildPatientItem(
-                  'P2',
-                  'Pasien 089 - ${controller.selectedDistrict.value}',
-                  'Pemantauan • Stabil',
-                  Colors.lime.shade200,
-                  const Color(0xFF808000),
-                ),
-              ],
-            ),
+            child: Obx(() {
+              final districtPatients = controller.patients.where(
+                  (p) => (p.district ?? 'Lainnya') == controller.selectedDistrict.value
+              ).toList();
+
+              if (districtPatients.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Tidak ada data pasien di wilayah ini',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: districtPatients.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final p = districtPatients[index];
+                  final name = p.fullName ?? 'Pasien ${p.id.substring(0, min(5, p.id.length))}';
+                  
+                  // Tentukan warna status
+                  Color statusColor = AppColors.success;
+                  Color avatarBg = AppColors.successLight;
+                  String statusText = 'Sembuh';
+                  
+                  if (p.isActive) {
+                    if (p.zone == 'merah') {
+                      statusColor = Colors.red.shade700;
+                      avatarBg = Colors.red.shade100;
+                      statusText = 'Risiko Tinggi';
+                    } else if (p.zone == 'kuning') {
+                      statusColor = const Color(0xFF808000);
+                      avatarBg = Colors.lime.shade200;
+                      statusText = 'Pemantauan';
+                    } else {
+                      statusColor = AppColors.success;
+                      avatarBg = AppColors.successLight;
+                      statusText = 'Stabil';
+                    }
+                  }
+
+                  return _buildPatientItem(
+                    name.substring(0, 1).toUpperCase(),
+                    name,
+                    statusText,
+                    avatarBg,
+                    statusColor,
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

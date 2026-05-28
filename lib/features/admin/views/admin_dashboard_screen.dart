@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tb_care/core/models/tracing_model.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../core/models/tracing_model.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/routes/app_routes.dart';
@@ -18,46 +19,27 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        titleSpacing: 16,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'TB-Control Center',
-              style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.white,
-              ),
+        title: Obx(() {
+          final firstName = controller.adminName.value.split(' ').first;
+          return Text(
+            'Petugas $firstName - Kota ${controller.adminCity.value}',
+            style: AppTextStyles.titleMedium.copyWith(
+              color: AppColors.white,
             ),
-            Text(
-              'Admin - Kota Surabaya',
-              style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.white.withOpacity(0.7),
-              ),
-            ),
-          ],
-        ),
+          );
+        }),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            onPressed: () => Get.toNamed(AppRoutes.adminNotifications),
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16, left: 4),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: AppColors.white,
-              child: Text(
-                'AD',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Obx(() {
@@ -102,72 +84,44 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
   }
 
   Widget _buildStatsGrid() {
-    return Obx(() => GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.25,
-          children: [
-            StatMiniCard(
-              title: 'Kasus Aktif',
-              value: '${controller.activePatients.value}',
-              icon: Icons.settings_outlined,
-              iconColor: AppColors.danger,
-              subtitle: '+12 mgg ini',
-            ),
-            StatMiniCard(
-              title: 'Kepatuhan',
-              value: '',
-              icon: Icons.verified_user_outlined,
-              iconColor: AppColors.primary,
-              subtitle: 'Rata-rata',
-              customValueWidget: SizedBox(
-                height: 48,
-                width: 48,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: CircularProgressIndicator(
-                        value: controller.kepatuhanPercentage.value / 100,
-                        backgroundColor: Colors.grey.shade200,
-                        color: AppColors.success,
-                        strokeWidth: 4,
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        '${controller.kepatuhanPercentage.value}%',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
+    return Obx(() => IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+                Expanded(
+                  child: StatMiniCard(
+                    title: 'Kasus Aktif',
+                    value: '${controller.activePatients.value}',
+                    icon: Icons.settings_outlined,
+                    iconColor: AppColors.danger,
+                  ),
+                ),
+              const SizedBox(width: 8),
+                Expanded(
+                  child: StatMiniCard(
+                    title: 'Tracing',
+                    value: '${controller.activeTracingCount.value}',
+                    icon: Icons.person_search_outlined,
+                    iconColor: AppColors.danger,
+                    badge: controller.tracingBadge,
+                    badgeColor: controller.tracingBadgeColor,
+                    subtitle: 'kontak',
+                  ),
+                ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: StatMiniCard(
+                  title: 'Zona Merah',
+                  value: '${controller.redZoneCount.value}',
+                  icon: Icons.warning_amber_rounded,
+                  iconColor: AppColors.danger,
+                  badge: controller.redZoneBadge,
+                  badgeColor: controller.redZoneBadgeColor,
+                  subtitle: 'kecamatan',
                 ),
               ),
-            ),
-            StatMiniCard(
-              title: 'Tracing Aktif',
-              value: '${controller.activeTracingCount.value}',
-              icon: Icons.person_search_outlined,
-              iconColor: AppColors.danger,
-              badge: 'PRIORITY',
-              badgeColor: AppColors.danger,
-              subtitle: 'kasus kontak',
-            ),
-            StatMiniCard(
-              title: 'Zona Merah',
-              value: '${controller.redZoneCount.value}',
-              icon: Icons.warning_amber_rounded,
-              iconColor: AppColors.danger,
-              badge: 'CRITICAL',
-              badgeColor: AppColors.danger,
-              subtitle: 'kecamatan',
-            ),
-          ],
+            ],
+          ),
         ));
   }
 
@@ -206,102 +160,32 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
             height: 180,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.successLight.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2),
+                color: AppColors.primary.withOpacity(0.2),
               ),
             ),
-            child: Stack(
-              children: [
-                // Mock map background pattern or color
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Opacity(
-                      opacity: 0.1,
-                      child: Image.asset(
-                        'assets/images/map_placeholder.png', // Assuming we have or just use an icon
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.map,
-                          size: 100,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Obx(() => GoogleMap(
+                liteModeEnabled: true, // Optimasi performa agar se-ringan gambar statis
+                initialCameraPosition: const CameraPosition(
+                  target: LatLng(-7.250445, 112.768845), // Pusat Surabaya
+                  zoom: 11,
                 ),
-                // Mock map heatspots
-                Positioned(
-                  top: 80,
-                  left: 140,
-                  child: _buildHeatSpot('14', AppColors.danger),
-                ),
-                Positioned(
-                  bottom: 40,
-                  right: 80,
-                  child: _buildHeatSpot('7', AppColors.warning),
-                ),
-                Positioned(
-                  top: 20,
-                  left: 90,
-                  child: _buildHeatSpot('9', AppColors.success),
-                ),
-              ],
+                markers: controller.previewMarkers.toSet(),
+                zoomControlsEnabled: false,
+                mapToolbarEnabled: false,
+                myLocationButtonEnabled: false,
+                onMapCreated: (GoogleMapController mapController) {
+                  mapController.setMapStyle('[{"featureType": "poi","stylers": [{"visibility": "off"}]},{"featureType": "transit","stylers": [{"visibility": "off"}]}]');
+                },
+                onTap: (_) => Get.find<MainAdminController>().changeTab(1),
+              )),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildHeatSpot(String count, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.4),
-            blurRadius: 20,
-            spreadRadius: 15,
-          ),
-          BoxShadow(
-            color: color.withValues(alpha: 0.2),
-            blurRadius: 40,
-            spreadRadius: 30,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                count,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-          const Icon(Icons.arrow_drop_down, color: Colors.white, size: 24, shadows: [
-            Shadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1))
-          ]),
-        ],
-      ),
     );
   }
 
@@ -328,12 +212,14 @@ class AdminDashboardScreen extends GetView<AdminDashboardController> {
         const SizedBox(height: 8),
         Obx(() {
           if (controller.recentTracing.isEmpty) {
-            // Mock data for UI presentation based on the image
-            return Column(
-              children: [
-                _buildTracingCard('Gubeng, SBY'),
-                _buildTracingCard('Wonokromo, SBY'),
-              ],
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  'Belum ada riwayat tracing terbaru.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
             );
           }
 

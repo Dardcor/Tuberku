@@ -49,4 +49,9 @@ app.*.map.json
 .env.*
 !.env.example
 
-db.sql
+# Android specific files
+android/app/google-services.json
+
+# AI Agents Knowledge Base
+AGENTS.md
+**/AGENTS.md

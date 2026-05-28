@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/user_model.dart';
+import '../../../core/models/patient_model.dart';
 import '../../../app/routes/app_routes.dart';
 
 class ProfileController extends GetxController {
@@ -9,6 +9,7 @@ class ProfileController extends GetxController {
 
   final isLoading = true.obs;
   final Rx<UserModel?> userProfile = Rx<UserModel?>(null);
+  final Rx<PatientModel?> patientData = Rx<PatientModel?>(null);
 
   @override
   void onInit() {
@@ -23,6 +24,9 @@ class ProfileController extends GetxController {
       if (user != null) {
         final profile = await _supabase.getProfile(user.id);
         userProfile.value = profile;
+        if (profile?.role == 'patient') {
+          patientData.value = await _supabase.getPatientByProfileId(user.id);
+        }
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat profil: ${e.toString()}');

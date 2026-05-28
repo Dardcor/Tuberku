@@ -4,7 +4,6 @@ import '../../features/auth/bindings/auth_binding.dart';
 import '../../features/auth/views/role_selection_screen.dart';
 import '../../features/auth/views/activation_screen.dart';
 import '../../features/auth/views/login_screen.dart';
-import '../../features/auth/views/register_screen.dart';
 import '../../features/auth/views/petugas_login_screen.dart';
 import '../../features/auth/views/consent_gps_screen.dart';
 import '../../features/patient/bindings/patient_binding.dart';
@@ -16,14 +15,16 @@ import '../../features/patient/views/facility_detail_screen.dart';
 import '../../features/tuberku_ai/bindings/ai_binding.dart';
 import '../../features/tuberku_ai/views/ai_chat_screen.dart';
 import '../../features/admin/bindings/admin_binding.dart';
-import '../../features/admin/views/admin_dashboard_screen.dart';
 import '../../features/admin/views/heatmap_screen.dart';
 import '../../features/admin/views/tracing_timeline_screen.dart';
 import '../../features/admin/views/tracing_detail_screen.dart';
-import '../../features/admin/views/intervention_form_screen.dart';
 import '../../features/profile/views/profile_screen.dart';
 import '../../features/profile/bindings/profile_binding.dart';
 import '../../features/admin/views/main_admin_screen.dart';
+import '../../features/admin/views/notification_screen.dart';
+import '../../features/admin/controllers/notification_controller.dart';
+import '../../features/patient/views/patient_notification_screen.dart';
+import '../../features/patient/controllers/patient_notification_controller.dart';
 
 class AppPages {
   AppPages._();
@@ -48,10 +49,6 @@ class AppPages {
     GetPage(
       name: AppRoutes.petugasLogin,
       page: () => const PetugasLoginScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.register,
-      page: () => const RegisterScreen(),
     ),
     GetPage(
       name: AppRoutes.consentGps,
@@ -109,9 +106,18 @@ class AppPages {
       binding: AdminBinding(),
     ),
     GetPage(
-      name: AppRoutes.interventionForm,
-      page: () => const InterventionFormScreen(),
-      binding: AdminBinding(),
+      name: AppRoutes.adminNotifications,
+      page: () => const NotificationScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => NotificationController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.patientNotifications,
+      page: () => const PatientNotificationScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => PatientNotificationController());
+      }),
     ),
     GetPage(
       name: AppRoutes.profile,

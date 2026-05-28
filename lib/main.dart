@@ -32,7 +32,7 @@ void main() async {
   await Get.putAsync(() => NotificationService().init());
   await Get.putAsync(() => RssService().init());
 
-  // Check existing session for permanent login
+  // Check existing session for auto-login
   final supabase = Get.find<SupabaseService>();
   String initialRoute = AppPages.initial;
 
@@ -40,14 +40,14 @@ void main() async {
     try {
       final profile = await supabase.getProfile(supabase.currentUser!.id);
       if (profile != null) {
-        if (profile.role == 'admin' || profile.role == 'petugas') {
+        if (profile.role == 'petugas') {
           initialRoute = AppRoutes.adminDashboard;
         } else {
           initialRoute = AppRoutes.patientDashboard;
         }
       }
-    } catch (_) {
-      // If error fetching profile, stay on login/role selection
+    } catch (e) {
+      debugPrint('[Tuberku] Auto-login error: $e');
     }
   }
 
@@ -71,7 +71,7 @@ class TuberkuApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
           primary: AppColors.primary,
-          secondary: AppColors.accent,
+          secondary: AppColors.secondary,
           surface: AppColors.cardBg,
           error: AppColors.danger,
         ),

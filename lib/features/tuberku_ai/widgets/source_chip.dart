@@ -11,7 +11,7 @@ class SourceChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.badgeGreenBg,
+        color: AppColors.successLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -20,7 +20,7 @@ class SourceChip extends StatelessWidget {
           const Icon(
             Icons.verified,
             size: 12,
-            color: AppColors.badgeGreenText,
+            color: AppColors.success,
           ),
           const SizedBox(width: 4),
           Text(
@@ -28,7 +28,7 @@ class SourceChip extends StatelessWidget {
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: AppColors.badgeGreenText,
+              color: AppColors.success,
             ),
           ),
         ],

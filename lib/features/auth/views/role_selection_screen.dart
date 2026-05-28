@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/config/app_constants.dart';
@@ -18,13 +19,13 @@ class RoleSelectionScreen extends GetView<AuthController> {
         bottom: false,
         child: Column(
           children: [
-            // Hero Section (40% of screen)
+            // Hero Section (50% of screen)
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
+                  SvgPicture.asset(
                     AppConstants.logoPath,
                     height: 100,
                     width: 100,
@@ -42,21 +43,21 @@ class RoleSelectionScreen extends GetView<AuthController> {
                   Text(
                     AppConstants.appTagline,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.accent,
+                      color: AppColors.white,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
             ),
-            // Bottom Section (60% of screen)
+            // Bottom Section (50% of screen)
             Expanded(
-              flex: 6,
+              flex: 5,
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
-                  vertical: 32,
+                  vertical: 40,
                 ),
                 decoration: const BoxDecoration(
                   color: AppColors.background,
@@ -153,34 +154,6 @@ class RoleSelectionScreen extends GetView<AuthController> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      // Register Link
-                      Center(
-                        child: TextButton(
-                          onPressed: () => Get.toNamed('/register'),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                          ),
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Belum punya akun? ',
-                              style: AppTextStyles.bodyMedium,
-                              children: [
-                                TextSpan(
-                                  text: 'Daftar Akun Baru',
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
@@ -200,7 +173,7 @@ class RoleSelectionScreen extends GetView<AuthController> {
           height: 8,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: AppColors.accent,
+            color: AppColors.secondary,
           ),
         ),
         const SizedBox(width: 8),

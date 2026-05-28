@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../app/config/app_constants.dart';
@@ -32,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
+      if (Get.isSnackbarOpen) return;
       Get.snackbar('Error', 'Email dan password wajib diisi',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.shade100);
@@ -49,10 +51,20 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.user != null) {
-        // Fetch profile to determine role
         final profile = await supabase.getProfile(response.user!.id);
-        
+
         if (mounted) {
+          if (profile?.role == 'petugas') {
+            await supabase.signOut();
+            Get.snackbar(
+              'Akses Ditolak',
+              'Akun Petugas tidak diizinkan masuk melalui portal Pasien.',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.orange.shade100,
+            );
+            return;
+          }
+
           Get.snackbar(
             'Berhasil!',
             'Selamat datang kembali, ${profile?.fullName ?? 'User'}',
@@ -61,17 +73,12 @@ class _LoginScreenState extends State<LoginScreen> {
             colorText: Colors.green.shade900,
           );
 
-          // Redirect based on role
-          if (profile?.role == 'admin' || profile?.role == 'petugas') {
-            Get.offAllNamed(AppRoutes.adminDashboard);
-          } else {
-            Get.offAllNamed(AppRoutes.patientDashboard);
-          }
+          Get.offAllNamed(AppRoutes.patientDashboard);
         }
       }
     } catch (e) {
       String errorMessage = 'Email atau password salah';
-      
+
       if (e.toString().contains('Invalid login credentials')) {
         errorMessage = 'Email atau password yang Anda masukkan salah.';
       } else if (e.toString().contains('network_error') || e.toString().contains('SocketException')) {
@@ -124,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   constraints: const BoxConstraints(),
                 ),
                 const SizedBox(height: 16),
-                Image.asset(
+                SvgPicture.asset(
                   AppConstants.logoPath,
                   height: 60,
                 ),
@@ -248,38 +255,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   Center(
-                    child: Column(
-                      children: [
-                        TextButton(
-                          onPressed: () => Get.toNamed(AppRoutes.register),
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Belum punya akun? ',
-                              style: AppTextStyles.bodyMedium,
-                              children: [
-                                TextSpan(
-                                  text: 'Daftar di sini',
-                                  style: AppTextStyles.bodyMedium.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                    child: TextButton.icon(
+                      onPressed: () => Get.toNamed(AppRoutes.activation),
+                      icon: const Icon(Icons.verified_user_outlined, color: AppColors.primary),
+                      label: Text(
+                        'Aktivasi Akun Pasien Baru',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 12),
-                        TextButton(
-                          onPressed: () => Get.toNamed(AppRoutes.activation),
-                          child: Text(
-                            'Punya Kode Aktivasi Pasien?',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textHint,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ],

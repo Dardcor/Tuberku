@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../app/config/app_colors.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/patient_model.dart';
 import 'dart:math';
@@ -23,9 +24,10 @@ class AddPatientController extends GetxController {
     _generatePatientId();
   }
 
-  void _generatePatientId() {
-    final random = Random().nextInt(9000) + 1000;
-    patientIdController.text = 'TB-2023-$random';
+  Future<void> _generatePatientId() async {
+    final count = await _supabase.countPatients();
+    final sequence = (count + 1).toString().padLeft(4, '0');
+    patientIdController.text = 'TB-${DateTime.now().year}-$sequence';
   }
 
   @override
@@ -40,6 +42,7 @@ class AddPatientController extends GetxController {
 
   Future<void> savePatient() async {
     if (nameController.text.isEmpty || nikController.text.isEmpty || phoneController.text.isEmpty) {
+      if (Get.isSnackbarOpen) return;
       Get.snackbar('Error', 'Harap lengkapi semua data wajib', 
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100);
@@ -48,13 +51,37 @@ class AddPatientController extends GetxController {
 
     isLoading.value = true;
     try {
-      // Logic to save to Supabase would go here
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network request
+      // Generate 6-digit random activation code
+      final random = Random();
+      final activationCode = List.generate(6, (index) => random.nextInt(10)).join();
       
-      Get.snackbar('Sukses', 'Data pasien berhasil disimpan',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.shade100,
-        colorText: Colors.green.shade900);
+      // Save to Supabase
+      await _supabase.client.from('patients').insert({
+        'profile_id': null, // Will be set by patient during activation
+        'full_name': nameController.text.trim(),
+        'nik': nikController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'facility_name': selectedPuskesmas.value,
+        'district': 'Surabaya', // Default or extracted from form later
+        'activation_code': activationCode,
+        'address': '', // You might want to add field for this
+        'diagnosis_date': dateController.text,
+        'tb_type': 'BTA+', // Default or from UI
+        'zone': 'hijau', // Default initial zone
+        'is_active': true,
+      });
+      
+      Get.defaultDialog(
+        title: 'Pasien Berhasil Didaftarkan',
+        content: Column(
+          children: [
+            Text('Kode Aktivasi Pasien:'),
+            Text(activationCode, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text('Berikan kode ini kepada pasien untuk aktivasi akun mereka.'),
+          ],
+        ),
+        confirm: TextButton(onPressed: () => Get.back(), child: Text('OK')),
+      );
       
       // Reset form
       nameController.clear();
@@ -64,7 +91,7 @@ class AddPatientController extends GetxController {
       selectedPuskesmas.value = null;
       _generatePatientId();
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menyimpan data pasien',
+      Get.snackbar('Error', 'Gagal menyimpan data pasien: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.shade100);
     } finally {

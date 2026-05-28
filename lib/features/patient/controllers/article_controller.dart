@@ -12,7 +12,7 @@ class ArticleController extends GetxController {
   final selectedFilter = 'Semua'.obs;
   final hasError = false.obs;
 
-  final filters = ['Semua', 'Kemenkes RI', 'WHO'];
+  final filters = ['Semua', 'Kemenkes RI', 'WHO'].obs;
 
   // Current article for detail page
   final Rx<ArticleModel?> currentArticle = Rx<ArticleModel?>(null);

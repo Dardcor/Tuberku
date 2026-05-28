@@ -33,13 +33,13 @@ class ArticleCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: AppColors.badgeGreenBg,
+              color: AppColors.successLight,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               source,
               style: const TextStyle(
-                color: AppColors.badgeGreenText,
+                color: AppColors.success,
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
               ),

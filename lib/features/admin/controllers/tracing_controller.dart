@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/tracing_model.dart';
@@ -26,7 +27,8 @@ class TracingController extends GetxController {
     try {
       final result = await _supabase.getTracingLogs();
       tracingLogs.assignAll(result);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[TracingController] loadData error: $e');
       hasError.value = true;
     } finally {
       isLoading.value = false;
@@ -38,7 +40,8 @@ class TracingController extends GetxController {
     try {
       final result = await _supabase.getTracingLogs(patientId: patientId);
       patientTracingLogs.assignAll(result);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[TracingController] loadData error: $e');
       hasError.value = true;
     } finally {
       isLoading.value = false;

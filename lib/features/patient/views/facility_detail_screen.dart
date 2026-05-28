@@ -103,38 +103,6 @@ class FacilityDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Stock info
-            Text('Ketersediaan Obat', style: AppTextStyles.titleMedium),
-            const SizedBox(height: 12),
-            _buildStockRow('Rifampicin', facility.rifampicinStatus),
-            const SizedBox(height: 8),
-            _buildStockRow('Isoniazid', facility.isoniazidStatus),
-            const SizedBox(height: 8),
-            _buildStockRow('FDC', facility.fdcStatus),
-            if (facility.rifampicinStatus == null &&
-                facility.isoniazidStatus == null &&
-                facility.fdcStatus == null) ...[
-              const SizedBox(height: 12),
-              AppCard(
-                color: AppColors.warningLight,
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline,
-                        color: AppColors.warning, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Data stok sementara tidak tersedia, silakan hubungi fasilitas langsung.',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.badgeYellowText,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
             // Opening hours
             if (facility.openingHours != null) ...[
               Text('Jam Operasional', style: AppTextStyles.titleMedium),
@@ -185,27 +153,4 @@ class FacilityDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStockRow(String name, String? status) {
-    final isAvailable = status == 'tersedia';
-    return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            name,
-            style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w500),
-          ),
-          StatusBadge(
-            text: status != null
-                ? (isAvailable ? 'Tersedia' : 'Habis')
-                : 'N/A',
-            type: status != null
-                ? (isAvailable ? BadgeType.green : BadgeType.red)
-                : BadgeType.yellow,
-          ),
-        ],
-      ),
-    );
-  }
 }

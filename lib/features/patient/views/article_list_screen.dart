@@ -15,11 +15,6 @@ class ArticleListScreen extends GetView<ArticleController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Artikel Edukasi'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
-      ),
       body: Column(
         children: [
           // Search bar
