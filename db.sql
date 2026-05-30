@@ -2,7 +2,7 @@ create extension if not exists "uuid-ossp";
 
 create table if not exists public.profiles (
     id uuid references auth.users on delete cascade primary key,
-    full_name text not null,
+    full_name text not null,    
     email text,
     phone text,
     role text check (role in ('patient', 'petugas')) default 'patient',
@@ -305,3 +305,22 @@ begin
     return true;
 end;
 $$ language plpgsql security definer;
+
+-- Upgrade patients with created_by field for tracking
+do $$
+begin
+    if not exists (select 1 from information_schema.columns where table_name='patients' and column_name='created_by') then
+        alter table public.patients add column created_by uuid references public.profiles(id);
+    end if;
+end $$;
+
+-- Policy to allow authenticated petugas to insert/publish articles
+do $$
+begin
+    if not exists (select 1 from pg_policies where policyname = 'Only petugas can insert articles.') then
+        create policy "Only petugas can insert articles." on public.articles for insert with check ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Allow insert for authenticated users') then
+        create policy "Allow insert for authenticated users" on public.articles for insert with check (auth.role() = 'authenticated');
+    end if;
+end $$;
