@@ -18,6 +18,7 @@ class SupabaseService extends GetxService {
       anonKey: SupabaseConfig.supabaseAnonKey,
     );
     _client = Supabase.instance.client;
+    _seedSurabayaTimurData();
     return this;
   }
 
@@ -143,6 +144,32 @@ class SupabaseService extends GetxService {
         .update({'zone': zone}).eq('id', patientId);
   }
 
+  Future<void> updatePatient(String patientId, Map<String, dynamic> data) async {
+    await _client
+        .from(SupabaseConfig.patientsTable)
+        .update(data)
+        .eq('id', patientId);
+  }
+
+  Future<void> insertArticle(Map<String, dynamic> data) async {
+    await _client
+        .from(SupabaseConfig.articlesTable)
+        .insert(data);
+  }
+
+  Future<List<Map<String, dynamic>>> getZones() async {
+    try {
+      final data = await _client
+          .from(SupabaseConfig.zonesTable)
+          .select()
+          .order('name');
+      return List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      debugPrint('[SupabaseService] getZones error: $e');
+      return [];
+    }
+  }
+
   Future<int> countActivePatients() async {
     try {
       final data = await _client
@@ -152,6 +179,47 @@ class SupabaseService extends GetxService {
       return data.length;
     } catch (e) {
       debugPrint('[SupabaseService] countActivePatients error: $e');
+      return 0;
+    }
+  }
+
+  Future<int> countActivePatientsForOfficer(String officerId) async {
+    try {
+      final profile = await getProfile(officerId);
+      final facilityName = profile?.facilityName;
+
+      if (facilityName != null && facilityName.isNotEmpty) {
+        // Query active patients that either have created_by = officerId OR facility_name = officer's facilityName
+        final data = await _client
+            .from(SupabaseConfig.patientsTable)
+            .select('id')
+            .eq('is_active', true)
+            .or('created_by.eq.$officerId,facility_name.eq."$facilityName"');
+        return data.length;
+      } else {
+        final data = await _client
+            .from(SupabaseConfig.patientsTable)
+            .select('id')
+            .eq('is_active', true)
+            .eq('created_by', officerId);
+        return data.length;
+      }
+    } catch (e) {
+      debugPrint('[SupabaseService] countActivePatientsForOfficer main error: $e');
+      // Simple fallback to facility name match if the OR query fails (e.g. created_by column does not exist)
+      try {
+        final profile = await getProfile(officerId);
+        if (profile != null && profile.facilityName != null && profile.facilityName!.isNotEmpty) {
+          final data = await _client
+              .from(SupabaseConfig.patientsTable)
+              .select('id')
+              .eq('is_active', true)
+              .eq('facility_name', profile.facilityName!);
+          return data.length;
+        }
+      } catch (innerError) {
+        debugPrint('[SupabaseService] countActivePatientsForOfficer fallback error: $innerError');
+      }
       return 0;
     }
   }
@@ -282,5 +350,78 @@ class SupabaseService extends GetxService {
       'role': role,
       'content': content,
     });
+  }
+
+  Future<void> _seedSurabayaTimurData() async {
+    try {
+      // 1. Delete Bandung facilities/zones (which do not match Surabaya Timur)
+      await _client.from('facilities').delete().not('name', 'in', [
+        'Puskesmas Mulyorejo',
+        'Puskesmas Rungkut',
+        'Puskesmas Kalirungkut',
+        'Puskesmas Sukolilo',
+        'Puskesmas Gunung Anyar',
+        'Puskesmas Menur',
+        'Puskesmas Gubeng Masjid',
+        'Puskesmas Tambaksari',
+        'Puskesmas Pacar Keling',
+        'Puskesmas Gading'
+      ]);
+
+      await _client.from('zones').delete().not('name', 'in', [
+        'Kecamatan Gubeng',
+        'Kecamatan Tambaksari',
+        'Kecamatan Sukolilo',
+        'Kecamatan Rungkut',
+        'Kecamatan Mulyorejo',
+        'Kecamatan Gunung Anyar',
+        'Kecamatan Tenggilis Mejoyo'
+      ]);
+
+      // 2. Insert Surabaya Timur facilities if they do not exist
+      final existingFacilities = await _client.from('facilities').select('name');
+      final existingFacNames = (existingFacilities as List).map((f) => f['name'] as String).toSet();
+
+      final facilitiesToSeed = [
+        {'name': 'Puskesmas Mulyorejo', 'type': 'Puskesmas', 'address': 'Jl. Mulyorejo No. 12, Surabaya', 'latitude': -7.2694, 'longitude': 112.7885},
+        {'name': 'Puskesmas Rungkut', 'type': 'Puskesmas', 'address': 'Jl. Rungkut Asri Timur No. 1, Surabaya', 'latitude': -7.3223, 'longitude': 112.7758},
+        {'name': 'Puskesmas Kalirungkut', 'type': 'Puskesmas', 'address': 'Jl. Rungkut Lor No. 22, Surabaya', 'latitude': -7.3200, 'longitude': 112.7810},
+        {'name': 'Puskesmas Sukolilo', 'type': 'Puskesmas', 'address': 'Jl. Sukolilo No. 34, Surabaya', 'latitude': -7.2917, 'longitude': 112.7958},
+        {'name': 'Puskesmas Gunung Anyar', 'type': 'Puskesmas', 'address': 'Jl. Gunung Anyar Timur No. 5, Surabaya', 'latitude': -7.3323, 'longitude': 112.7885},
+        {'name': 'Puskesmas Menur', 'type': 'Puskesmas', 'address': 'Jl. Menur Pumpungan No. 1, Surabaya', 'latitude': -7.2830, 'longitude': 112.7700},
+        {'name': 'Puskesmas Gubeng Masjid', 'type': 'Puskesmas', 'address': 'Jl. Gubeng Masjid No. 2, Surabaya', 'latitude': -7.2750, 'longitude': 112.7530},
+        {'name': 'Puskesmas Tambaksari', 'type': 'Puskesmas', 'address': 'Jl. Tambaksari No. 12, Surabaya', 'latitude': -7.2514, 'longitude': 112.7661},
+        {'name': 'Puskesmas Pacar Keling', 'type': 'Puskesmas', 'address': 'Jl. Pacar Keling No. 15, Surabaya', 'latitude': -7.2590, 'longitude': 112.7600},
+        {'name': 'Puskesmas Gading', 'type': 'Puskesmas', 'address': 'Jl. Kenjeran No. 280, Surabaya', 'latitude': -7.2450, 'longitude': 112.7750},
+      ];
+
+      for (final fac in facilitiesToSeed) {
+        if (!existingFacNames.contains(fac['name'])) {
+          await _client.from('facilities').insert(fac);
+        }
+      }
+
+      // 3. Insert Surabaya Timur zones if they do not exist
+      final existingZones = await _client.from('zones').select('name');
+      final existingZoneNames = (existingZones as List).map((z) => z['name'] as String).toSet();
+
+      final zonesToSeed = [
+        {'name': 'Kecamatan Gubeng', 'level': 'merah', 'case_count': 24, 'latitude': -7.2816, 'longitude': 112.7562},
+        {'name': 'Kecamatan Tambaksari', 'level': 'merah', 'case_count': 31, 'latitude': -7.2514, 'longitude': 112.7661},
+        {'name': 'Kecamatan Sukolilo', 'level': 'kuning', 'case_count': 15, 'latitude': -7.2917, 'longitude': 112.7958},
+        {'name': 'Kecamatan Rungkut', 'level': 'kuning', 'case_count': 12, 'latitude': -7.3223, 'longitude': 112.7758},
+        {'name': 'Kecamatan Mulyorejo', 'level': 'hijau', 'case_count': 5, 'latitude': -7.2694, 'longitude': 112.7885},
+        {'name': 'Kecamatan Gunung Anyar', 'level': 'hijau', 'case_count': 3, 'latitude': -7.3323, 'longitude': 112.7885},
+        {'name': 'Kecamatan Tenggilis Mejoyo', 'level': 'hijau', 'case_count': 2, 'latitude': -7.3204, 'longitude': 112.7621},
+      ];
+
+      for (final zone in zonesToSeed) {
+        if (!existingZoneNames.contains(zone['name'])) {
+          await _client.from('zones').insert(zone);
+        }
+      }
+    } catch (e) {
+      debugPrint('[SupabaseService] _seedSurabayaTimurData error: $e');
+    }
   }
 }
