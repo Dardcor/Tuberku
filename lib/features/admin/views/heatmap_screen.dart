@@ -4,10 +4,8 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
-import '../../../core/widgets/loading_shimmer.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../controllers/heatmap_controller.dart';
-import '../controllers/main_admin_controller.dart';
 
 class HeatmapScreen extends GetView<HeatmapController> {
   const HeatmapScreen({super.key});
@@ -64,19 +62,25 @@ class HeatmapScreen extends GetView<HeatmapController> {
                                 .map((z) => PopupMenuItem(value: z, child: Text(z)))
                                 .toList(),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              constraints: const BoxConstraints(maxWidth: 130),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: controller.selectedZoneFilter.value == 'Semua' ? Colors.white : AppColors.primary,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    controller.selectedZoneFilter.value == 'Semua' ? 'Zona' : controller.selectedZoneFilter.value, 
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: controller.selectedZoneFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
-                                    )
+                                  Flexible(
+                                    child: Text(
+                                      controller.selectedZoneFilter.value == 'Semua' ? 'Zona' : controller.selectedZoneFilter.value, 
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: controller.selectedZoneFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
@@ -95,19 +99,25 @@ class HeatmapScreen extends GetView<HeatmapController> {
                                 .map((d) => PopupMenuItem(value: d, child: Text(d)))
                                 .toList(),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              constraints: const BoxConstraints(maxWidth: 160),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: controller.selectedDistrict.value == 'Semua' ? Colors.white : AppColors.primary,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    controller.selectedDistrict.value == 'Semua' ? 'Kecamatan' : controller.selectedDistrict.value, 
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: controller.selectedDistrict.value == 'Semua' ? AppColors.textPrimary : Colors.white,
-                                    )
+                                  Flexible(
+                                    child: Text(
+                                      controller.selectedDistrict.value == 'Semua' ? 'Kecamatan' : controller.selectedDistrict.value, 
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: controller.selectedDistrict.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
@@ -126,19 +136,25 @@ class HeatmapScreen extends GetView<HeatmapController> {
                                 .map((s) => PopupMenuItem(value: s, child: Text(s)))
                                 .toList(),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              constraints: const BoxConstraints(maxWidth: 140),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: controller.selectedStatusFilter.value == 'Semua' ? Colors.white : AppColors.primary,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    controller.selectedStatusFilter.value == 'Semua' ? 'Status Kasus' : controller.selectedStatusFilter.value, 
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: controller.selectedStatusFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
-                                    )
+                                  Flexible(
+                                    child: Text(
+                                      controller.selectedStatusFilter.value == 'Semua' ? 'Status Kasus' : controller.selectedStatusFilter.value, 
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: controller.selectedStatusFilter.value == 'Semua' ? AppColors.textPrimary : Colors.white,
+                                      ),
+                                    ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
@@ -297,9 +313,22 @@ class HeatmapScreen extends GetView<HeatmapController> {
           // Patient List
           Expanded(
             child: Obx(() {
-              final districtPatients = controller.patients.where(
-                  (p) => (p.district ?? 'Lainnya') == controller.selectedDistrict.value
-              ).toList();
+              final districtPatients = controller.patients.where((p) {
+                String pDistrict = p.district ?? 'Lainnya';
+                if (pDistrict.startsWith('Kecamatan ')) {
+                  pDistrict = pDistrict.replaceAll('Kecamatan ', '');
+                }
+                final matchesDistrict = controller.selectedDistrict.value == 'Semua' || pDistrict == controller.selectedDistrict.value;
+                
+                final matchesStatus = controller.selectedStatusFilter.value == 'Semua' ||
+                    (controller.selectedStatusFilter.value == 'Aktif' && p.isActive) ||
+                    (controller.selectedStatusFilter.value == 'Sembuh' && !p.isActive);
+
+                final matchesZone = controller.selectedZoneFilter.value == 'Semua' ||
+                    (p.zone?.toLowerCase() ?? '') == controller.selectedZoneFilter.value.toLowerCase();
+
+                return matchesDistrict && matchesStatus && matchesZone;
+              }).toList();
 
               if (districtPatients.isEmpty) {
                 return const Center(
@@ -339,12 +368,21 @@ class HeatmapScreen extends GetView<HeatmapController> {
                     }
                   }
 
-                  return _buildPatientItem(
-                    name.substring(0, 1).toUpperCase(),
-                    name,
-                    statusText,
-                    avatarBg,
-                    statusColor,
+                  final patientStatus = p.isActive ? 'Aktif' : 'Sembuh';
+                  final fullSubtitle = '$patientStatus ($statusText) • ${p.tbType ?? "BTA+"} • Kecamatan ${p.district ?? "-"}';
+
+                  return GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/admin/patient/detail', arguments: p);
+                    },
+                    child: _buildPatientItem(
+                      name.substring(0, 1).toUpperCase(),
+                      name,
+                      fullSubtitle,
+                      avatarBg,
+                      statusColor,
+                      p.profileId != null,
+                    ),
                   );
                 },
               );
@@ -374,7 +412,7 @@ class HeatmapScreen extends GetView<HeatmapController> {
     );
   }
 
-  Widget _buildPatientItem(String avatar, String name, String status, Color avatarBg, Color statusColor) {
+  Widget _buildPatientItem(String avatar, String name, String status, Color avatarBg, Color statusColor, bool isActivated) {
     return Row(
       children: [
         CircleAvatar(
@@ -389,18 +427,55 @@ class HeatmapScreen extends GetView<HeatmapController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isActivated ? Colors.green.shade50 : Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: isActivated ? Colors.green.shade200 : Colors.blue.shade200,
+                      ),
+                    ),
+                    child: Text(
+                      isActivated ? 'Aktif' : 'Belum Aktivasi',
+                      style: TextStyle(
+                        color: isActivated ? Colors.green.shade800 : Colors.blue.shade800,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 4),
               Row(
                 children: [
                   Container(width: 6, height: 6, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
                   const SizedBox(width: 4),
-                  Text(status, style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary)),
+                  Expanded(
+                    child: Text(
+                      status,
+                      style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
+        const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),

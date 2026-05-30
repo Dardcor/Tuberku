@@ -6,10 +6,8 @@ import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../core/models/tracing_model.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/loading_shimmer.dart';
 import '../controllers/tracing_controller.dart';
-import '../widgets/zone_badge.dart';
 
 class TracingDetailScreen extends GetView<TracingController> {
   const TracingDetailScreen({super.key});

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/patient_model.dart';
+import '../controllers/add_patient_controller.dart';
 
 class HeatmapController extends GetxController {
   final _supabase = Get.find<SupabaseService>();
@@ -38,7 +39,14 @@ class HeatmapController extends GetxController {
     try {
       final result = await _supabase.getPatients(); // Fetch ALL patients to get both active and recovered
       patients.assignAll(result);
-      _calculateStats();
+
+      // Fetch zones from db
+      final zonesList = await _supabase.getZones();
+
+      // Fetch tracing logs to calculate tracing count per district
+      final tracingLogs = await _supabase.getTracingLogs();
+      
+      _calculateStats(zonesList, tracingLogs);
       _buildMarkers();
     } catch (e) {
       debugPrint('[HeatmapController] loadData error: $e');
@@ -48,26 +56,21 @@ class HeatmapController extends GetxController {
     }
   }
 
-  void _calculateStats() {
+  void _calculateStats(List<Map<String, dynamic>> zones, List<dynamic> tracingLogs) {
     final stats = <String, Map<String, int>>{};
-    
-    // Daftar kecamatan bawaan (Default Surabaya)
-    final uniqueDistricts = <String>{
-      'Genteng', 
-      'Wonokromo', 
-      'Gubeng', 
-      'Tegalsari', 
-      'Tambaksari'
-    };
+    final uniqueDistricts = <String>{...AddPatientController.surabayaTimurDistricts};
     
     // Inisialisasi semua kecamatan dasar dengan nilai 0
     for (final dist in uniqueDistricts) {
       stats[dist] = {'active': 0, 'recovered': 0, 'tracing': 0};
     }
+    stats['Semua'] = {'active': 0, 'recovered': 0, 'tracing': 0};
     
     for (final p in patients) {
-      final dist = p.district ?? 'Lainnya';
-      uniqueDistricts.add(dist);
+      String dist = p.district ?? 'Lainnya';
+      if (dist.startsWith('Kecamatan ')) {
+        dist = dist.replaceAll('Kecamatan ', '');
+      }
       
       if (!stats.containsKey(dist)) {
         stats[dist] = {'active': 0, 'recovered': 0, 'tracing': 0};
@@ -75,8 +78,25 @@ class HeatmapController extends GetxController {
       
       if (p.isActive) {
         stats[dist]!['active'] = (stats[dist]!['active'] ?? 0) + 1;
+        stats['Semua']!['active'] = (stats['Semua']!['active'] ?? 0) + 1;
       } else {
         stats[dist]!['recovered'] = (stats[dist]!['recovered'] ?? 0) + 1;
+        stats['Semua']!['recovered'] = (stats['Semua']!['recovered'] ?? 0) + 1;
+      }
+    }
+
+    // Count tracing logs per district
+    for (final log in tracingLogs) {
+      final patient = patients.firstWhereOrNull((p) => p.id == log.patientId);
+      if (patient != null) {
+        String dist = patient.district ?? 'Lainnya';
+        if (dist.startsWith('Kecamatan ')) {
+          dist = dist.replaceAll('Kecamatan ', '');
+        }
+        if (stats.containsKey(dist)) {
+          stats[dist]!['tracing'] = (stats[dist]!['tracing'] ?? 0) + 1;
+        }
+        stats['Semua']!['tracing'] = (stats['Semua']!['tracing'] ?? 0) + 1;
       }
     }
     
@@ -92,7 +112,6 @@ class HeatmapController extends GetxController {
   void setDistrict(String district) {
     selectedDistrict.value = district;
     _buildMarkers();
-    // Animate map to district center could be added here
   }
 
   void setZoneFilter(String zone) {
@@ -117,7 +136,10 @@ class HeatmapController extends GetxController {
       if (selectedZoneFilter.value != 'Semua' && (p.zone?.toLowerCase() ?? '') != selectedZoneFilter.value.toLowerCase()) continue;
 
       // 3. Filter Kecamatan
-      final pDistrict = p.district ?? 'Lainnya';
+      String pDistrict = p.district ?? 'Lainnya';
+      if (pDistrict.startsWith('Kecamatan ')) {
+        pDistrict = pDistrict.replaceAll('Kecamatan ', '');
+      }
       if (selectedDistrict.value != 'Semua' && pDistrict != selectedDistrict.value) continue;
 
       if (p.domicileLat != null && p.domicileLng != null) {
@@ -129,7 +151,7 @@ class HeatmapController extends GetxController {
         if (!p.isActive) hue = BitmapDescriptor.hueCyan;
         
         newMarkers.add(_createCustomMarker(
-          p.id, 
+          p, 
           p.domicileLat!, 
           p.domicileLng!, 
           p.fullName ?? 'Pasien', 
@@ -141,12 +163,18 @@ class HeatmapController extends GetxController {
     markers.assignAll(newMarkers);
   }
 
-  Marker _createCustomMarker(String id, double lat, double lng, String title, double hue) {
+  Marker _createCustomMarker(PatientModel patient, double lat, double lng, String title, double hue) {
     return Marker(
-      markerId: MarkerId(id),
+      markerId: MarkerId(patient.id),
       position: LatLng(lat, lng),
       icon: BitmapDescriptor.defaultMarkerWithHue(hue),
-      infoWindow: InfoWindow(title: title),
+      infoWindow: InfoWindow(
+        title: title,
+        snippet: 'Ketuk untuk lihat detail',
+        onTap: () {
+          Get.toNamed('/admin/patient/detail', arguments: patient);
+        },
+      ),
     );
   }
 
