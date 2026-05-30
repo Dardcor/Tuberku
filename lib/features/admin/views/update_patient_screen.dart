@@ -5,24 +5,28 @@ import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_button.dart';
+import '../controllers/patient_detail_controller.dart';
 import '../controllers/add_patient_controller.dart';
 
-class AddPatientScreen extends GetView<AddPatientController> {
-  const AddPatientScreen({super.key});
+class UpdatePatientScreen extends GetView<PatientDetailController> {
+  const UpdatePatientScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // If the controller is somehow not initialized with the arguments, initialize it.
+    // This handles the case where users navigate directly to update screen.
+    final patientArg = Get.arguments;
+    if (patientArg != null && controller.patient.value == null) {
+      controller.setPatient(patientArg);
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        title: const Text('Update Data Pasien'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Tambah Pasien Baru',
-          style: AppTextStyles.titleMedium.copyWith(color: AppColors.white),
-        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -30,26 +34,19 @@ class AddPatientScreen extends GetView<AddPatientController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Lengkapi data di bawah ini untuk mendaftarkan pasien baru ke dalam sistem pemantauan.',
+              'Perbarui informasi pasien di bawah ini. Pastikan data yang dimasukkan valid.',
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
-            
+
             // IDENTITAS PASIEN
             _buildSection(
               title: 'IDENTITAS PASIEN',
               icon: Icons.badge_outlined,
               children: [
                 _buildField(
-                  label: 'ID Pasien (Otomatis)',
-                  controller: controller.patientIdController,
-                  readOnly: true,
-                  filled: true,
-                  fillColor: Colors.grey.shade200,
-                ),
-                _buildField(
                   label: 'Nama Lengkap',
-                  hint: 'Masukkan nama lengkap pasien',
+                  hint: 'Masukkan nama lengkap',
                   controller: controller.nameController,
                 ),
                 _buildField(
@@ -60,13 +57,13 @@ class AddPatientScreen extends GetView<AddPatientController> {
                 ),
                 _buildField(
                   label: 'Nomor Telepon / WhatsApp',
-                  hint: 'Contoh: 08123456789',
+                  hint: 'Masukkan nomor telepon',
                   controller: controller.phoneController,
                   keyboardType: TextInputType.phone,
                 ),
                 _buildField(
-                  label: 'Alamat Lengkap',
-                  hint: 'Masukkan alamat rumah lengkap',
+                  label: 'Alamat Rumah / Domicile',
+                  hint: 'Masukkan alamat tinggal',
                   controller: controller.addressController,
                 ),
                 const SizedBox(height: 8),
@@ -94,13 +91,78 @@ class AddPatientScreen extends GetView<AddPatientController> {
                       .toList(),
                   onChanged: (val) => controller.selectedDistrict.value = val,
                 )),
-                const SizedBox(height: 16),
               ],
             ),
-            
-            // DATA PERAWATAN
+
+            // STATUS MONITORING & STATUS AKTIF (CRITICAL REQ)
             _buildSection(
-              title: 'DATA PERAWATAN',
+              title: 'STATUS & PEMANTAUAN',
+              icon: Icons.health_and_safety_outlined,
+              children: [
+                // STATUS AKTIF (Dropdown)
+                Text('Status Pasien', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Obx(() => DropdownButtonFormField<bool>(
+                  value: controller.isActive.value,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: true, child: Text('Aktif')),
+                    DropdownMenuItem(value: false, child: Text('Sembuh / Tidak Aktif')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) controller.isActive.value = val;
+                  },
+                )),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1),
+                ),
+
+                // ZONA KASUS
+                Text('Zona Risiko Kasus', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                Obx(() => DropdownButtonFormField<String>(
+                  value: controller.selectedZone.value,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'hijau', child: Text('Zona Hijau (Risiko Rendah)')),
+                    DropdownMenuItem(value: 'kuning', child: Text('Zona Kuning (Pemantauan)')),
+                    DropdownMenuItem(value: 'merah', child: Text('Zona Merah (Risiko Tinggi)')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) controller.selectedZone.value = val;
+                  },
+                )),
+              ],
+            ),
+
+            // CLINICAL DATA
+            _buildSection(
+              title: 'DATA MEDIS',
               icon: Icons.medical_services_outlined,
               children: [
                 _buildField(
@@ -122,6 +184,7 @@ class AddPatientScreen extends GetView<AddPatientController> {
                   },
                 ),
                 const SizedBox(height: 16),
+
                 Text('Puskesmas Rujukan Utama', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Obx(() => DropdownButtonFormField<String>(
@@ -147,6 +210,7 @@ class AddPatientScreen extends GetView<AddPatientController> {
                   onChanged: (val) => controller.selectedPuskesmas.value = val,
                 )),
                 const SizedBox(height: 16),
+
                 Text('Tipe TB', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Obx(() => DropdownButtonFormField<String>(
@@ -177,8 +241,8 @@ class AddPatientScreen extends GetView<AddPatientController> {
                 )),
               ],
             ),
-            
-            // KOORDINAT DOMISILI
+
+            // Domicile Coordinates for Map
             _buildSection(
               title: 'KOORDINAT DOMISILI',
               icon: Icons.map_outlined,
@@ -195,18 +259,24 @@ class AddPatientScreen extends GetView<AddPatientController> {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: Obx(() => GoogleMap(
-                    initialCameraPosition: const CameraPosition(
-                      target: LatLng(-7.2816, 112.7562), // Surabaya Timur center
-                      zoom: 12,
-                    ),
-                    markers: controller.markers.value,
-                    onTap: (position) {
-                      controller.updatePosition(position);
-                    },
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: true,
-                  )),
+                  child: Obx(() {
+                    final latStr = controller.latController.text;
+                    final lngStr = controller.lngController.text;
+                    final initialLat = double.tryParse(latStr) ?? -7.2816;
+                    final initialLng = double.tryParse(lngStr) ?? 112.7562;
+                    return GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(initialLat, initialLng),
+                        zoom: 12,
+                      ),
+                      markers: controller.markers.value,
+                      onTap: (position) {
+                        controller.updatePosition(position);
+                      },
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: true,
+                    );
+                  }),
                 ),
                 const SizedBox(height: 16),
                 _buildField(
@@ -225,10 +295,10 @@ class AddPatientScreen extends GetView<AddPatientController> {
             ),
             const SizedBox(height: 24),
             Obx(() => AppButton(
-              text: 'SIMPAN DATA PASIEN',
+              text: 'SIMPAN PERUBAHAN',
               icon: Icons.save_outlined,
               isLoading: controller.isLoading.value,
-              onPressed: controller.savePatient,
+              onPressed: controller.updatePatientData,
             )),
             const SizedBox(height: 32),
           ],
@@ -244,30 +314,31 @@ class AddPatientScreen extends GetView<AddPatientController> {
         color: Colors.white,
         padding: const EdgeInsets.all(16),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: AppColors.primary, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1),
-          ),
-          ...children,
-        ],
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
+            ),
+            ...children,
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildField({
