@@ -25,6 +25,11 @@ import '../../features/admin/views/notification_screen.dart';
 import '../../features/admin/controllers/notification_controller.dart';
 import '../../features/patient/views/patient_notification_screen.dart';
 import '../../features/patient/controllers/patient_notification_controller.dart';
+import '../../features/admin/views/patient_detail_screen.dart';
+import '../../features/admin/views/update_patient_screen.dart';
+import '../../features/admin/views/article_form_screen.dart';
+import '../../features/admin/controllers/patient_detail_controller.dart';
+import '../../features/admin/controllers/article_form_controller.dart';
 
 class AppPages {
   AppPages._();
@@ -123,6 +128,27 @@ class AppPages {
       name: AppRoutes.profile,
       page: () => const ProfileScreen(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.patientDetail,
+      page: () => const PatientDetailScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => PatientDetailController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.updatePatient,
+      page: () => const UpdatePatientScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => PatientDetailController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.articleForm,
+      page: () => const ArticleFormScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ArticleFormController());
+      }),
     ),
   ];
 }

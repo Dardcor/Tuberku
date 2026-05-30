@@ -17,4 +17,7 @@ abstract class AppRoutes {
   static const String adminNotifications = '/admin/notifications';
   static const String patientNotifications = '/patient/notifications';
   static const String profile = '/profile';
+  static const String patientDetail = '/admin/patient/detail';
+  static const String updatePatient = '/admin/patient/update';
+  static const String articleForm = '/admin/articles/create';
 }
