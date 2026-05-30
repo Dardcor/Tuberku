@@ -1,3 +1,57 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+name: tb_care
+description: "Tuberku - Aplikasi Pemantauan & Penanganan TBC"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.11.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  get: ^4.6.6
+  supabase_flutter: ^2.9.0
+  google_maps_flutter: ^2.12.1
+  geolocator: ^11.1.0
+  geocoding: ^3.0.0
+  google_generative_ai: ^0.4.7
+  dio: ^5.7.0
+  get_storage: ^2.1.1
+  dart_rss: ^3.0.3
+  firebase_core: ^3.12.1
+  firebase_messaging: ^15.2.4
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.17
+  intl: ^0.19.0
+  permission_handler: ^11.3.1
+  url_launcher: ^6.3.1
+  shimmer: ^3.0.0
+  google_fonts: ^6.2.1
+  flutter_dotenv: ^5.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: "^0.13.1"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/logo.png
+=======
+>>>>>>> 61294c55f3372314335c2f33d8cd895c5b5f3b2f
 name: tuberku
 description: "Tuberku - Aplikasi Pemantauan & Penanganan TBC"
 publish_to: 'none'
@@ -13,12 +67,18 @@ dependencies:
   get: ^4.6.6
   supabase_flutter: ^2.9.0
   google_maps_flutter: ^2.12.1
+<<<<<<< HEAD
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+=======
+  geolocator: ^11.1.0
+  geocoding: ^3.0.0
+>>>>>>> 61294c55f3372314335c2f33d8cd895c5b5f3b2f
   google_generative_ai: ^0.4.7
   dio: ^5.7.0
   get_storage: ^2.1.1
   dart_rss: ^3.0.3
+<<<<<<< HEAD
   firebase_core: ^4.9.0
   firebase_messaging: ^16.2.2
   cached_network_image: ^3.4.1
@@ -29,12 +89,28 @@ dependencies:
   shimmer: ^3.0.0
   google_fonts: ^8.1.0
   flutter_dotenv: ^6.0.1
+=======
+  firebase_core: ^3.12.1
+  firebase_messaging: ^15.2.4
+  cached_network_image: ^3.4.1
+  flutter_svg: ^2.0.17
+  intl: ^0.19.0
+  permission_handler: ^11.3.1
+  url_launcher: ^6.3.1
+  shimmer: ^3.0.0
+  google_fonts: ^6.2.1
+  flutter_dotenv: ^5.1.0
+>>>>>>> 61294c55f3372314335c2f33d8cd895c5b5f3b2f
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+<<<<<<< HEAD
   flutter_launcher_icons: ^0.14.4
+=======
+  flutter_launcher_icons: "^0.13.1"
+>>>>>>> 61294c55f3372314335c2f33d8cd895c5b5f3b2f
 
 # flutter_launcher_icons:
 #   android: "launcher_icon"
@@ -47,3 +123,7 @@ flutter:
   assets:
     - .env
     - assets/images/logo.svg
+<<<<<<< HEAD
+=======
+>>>>>>> 579452a358692d1a6d2721fd9e3b7d13a27b3b41
+>>>>>>> 61294c55f3372314335c2f33d8cd895c5b5f3b2f
