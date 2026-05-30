@@ -113,6 +113,10 @@ class AuthController extends GetxController {
             Get.snackbar('Error', 'Gagal mengaktifkan pasien. Kode tidak valid atau sudah digunakan.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100);
             return;
           }
+          
+          final patient = await _supabase.getPatientByProfileId(userId);
+          currentPatient.value = patient;
+
           Get.snackbar('Berhasil', 'Akun berhasil diaktivasi.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green.shade100);
           Get.offAllNamed(AppRoutes.consentGps);
       } else {
@@ -132,13 +136,19 @@ class AuthController extends GetxController {
     if (!gpsConsent.value) return;
     isSubmittingConsent.value = true;
     try {
-      if (currentPatient.value != null) {
+      final user = _supabase.currentUser;
+      if (user != null) {
+        final patient = await _supabase.getPatientByProfileId(user.id);
+        if (patient != null) {
+          await _supabase.updateGpsConsent(patient.id, consent: true);
+        }
+      } else if (currentPatient.value != null) {
         await _supabase.updateGpsConsent(currentPatient.value!.id, consent: true);
       }
       Get.offAllNamed(AppRoutes.patientDashboard);
     } catch (e) {
       if (Get.isSnackbarOpen) return;
-      Get.snackbar('Error', 'Gagal menyimpan persetujuan.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100);
+      Get.snackbar('Error', 'Gagal menyimpan persetujuan: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100);
     } finally {
       isSubmittingConsent.value = false;
     }
