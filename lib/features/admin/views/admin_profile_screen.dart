@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import '../../../app/config/app_colors.dart';
 import '../../../app/config/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../app/routes/app_routes.dart';
 import '../controllers/admin_profile_controller.dart';
+import '../controllers/add_patient_controller.dart';
 
 class AdminProfileScreen extends GetView<AdminProfileController> {
   const AdminProfileScreen({super.key});
@@ -26,18 +28,18 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildIdCard(),
+            _buildIdCard(context),
             const SizedBox(height: 20),
             _buildStats(),
             const SizedBox(height: 24),
-            _buildMenuSection(),
+            _buildMenuSection(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildIdCard() {
+  Widget _buildIdCard(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -111,6 +113,11 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_note, color: Colors.white, size: 28),
+                onPressed: () => _showEditProfileBottomSheet(context),
+                tooltip: 'Ubah Profil',
               ),
             ],
           ),
@@ -203,11 +210,23 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
     );
   }
 
-  Widget _buildMenuSection() {
+  Widget _buildMenuSection(BuildContext context) {
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
+          _buildMenuItem(
+            icon: Icons.edit_outlined,
+            title: 'Ubah Profil Petugas',
+            onTap: () => _showEditProfileBottomSheet(context),
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          _buildMenuItem(
+            icon: Icons.article_outlined,
+            title: 'Input Artikel Baru',
+            onTap: () => Get.toNamed(AppRoutes.articleForm),
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
           _buildMenuItem(
             icon: Icons.notifications_active_outlined,
             title: 'Pengaturan Notifikasi',
@@ -267,6 +286,124 @@ class AdminProfileScreen extends GetView<AdminProfileController> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showEditProfileBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Ubah Profil Petugas',
+                    style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Get.back(),
+                  ),
+                ],
+              ),
+              const Divider(height: 20),
+              
+              // NAMA LENGKAP
+              Text('Nama Lengkap', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller.fullNameEditController,
+                decoration: InputDecoration(
+                  hintText: 'Masukkan nama lengkap',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // NOMOR TELEPON
+              Text('Nomor Telepon', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller.phoneEditController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: 'Masukkan nomor telepon',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // NIP
+              Text('NIP (Nomor Induk Pegawai)', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller.nipEditController,
+                decoration: InputDecoration(
+                  hintText: 'Masukkan NIP',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // PUSKESMAS / FASKES
+              Text('Puskesmas / Wilayah Kerja', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Obx(() => DropdownButtonFormField<String>(
+                value: AddPatientController.surabayaTimurFaskes.contains(controller.selectedFacility.value) 
+                    ? controller.selectedFacility.value 
+                    : null,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                hint: const Text('Pilih Puskesmas'),
+                items: AddPatientController.surabayaTimurFaskes
+                    .map((f) => DropdownMenuItem(value: f, child: Text(f, overflow: TextOverflow.ellipsis)))
+                    .toList(),
+                onChanged: (val) {
+                  controller.selectedFacility.value = val;
+                },
+              )),
+              const SizedBox(height: 24),
+
+              // SAVE BUTTON
+              SizedBox(
+                width: double.infinity,
+                child: Obx(() => ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: controller.isUpdating.value ? null : () => controller.updateProfile(),
+                  child: controller.isUpdating.value
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('SIMPAN PERUBAHAN', style: TextStyle(fontWeight: FontWeight.bold)),
+                )),
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
