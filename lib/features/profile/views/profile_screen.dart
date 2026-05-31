@@ -147,6 +147,43 @@ class ProfileScreen extends GetView<ProfileController> {
             onTap: () => Get.snackbar('Info', 'Fitur belum tersedia'),
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
+          // GPS Tracking Switch
+          Obx(() {
+            final patient = controller.patientData.value;
+            if (patient == null) return const SizedBox.shrink();
+            return Column(
+              children: [
+                SwitchListTile(
+                  secondary: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.location_on, color: AppColors.primary, size: 20),
+                  ),
+                  title: const Text(
+                    'Persetujuan GPS Pasien',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Kirim lokasi otomatis setiap 5 detik',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  value: controller.gpsConsent.value,
+                  onChanged: controller.isUpdatingConsent.value
+                      ? null
+                      : (val) => controller.toggleGpsConsent(val),
+                  activeColor: AppColors.primary,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+              ],
+            );
+          }),
           _buildMenuItem(
             icon: Icons.logout,
             title: 'Keluar',
