@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/supabase_service.dart';
+import '../../../core/services/location_service.dart';
 import '../../../core/models/patient_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../../app/config/app_constants.dart';
@@ -144,6 +145,11 @@ class AuthController extends GetxController {
         }
       } else if (currentPatient.value != null) {
         await _supabase.updateGpsConsent(currentPatient.value!.id, consent: true);
+      }
+      try {
+        Get.find<LocationService>().resetTrackingCache();
+      } catch (e) {
+        debugPrint('[AuthController] Reset tracking cache failed: $e');
       }
       Get.offAllNamed(AppRoutes.patientDashboard);
     } catch (e) {

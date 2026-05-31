@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (response.user != null) {
         await supabase.upsertProfile(UserModel(
           id: response.user!.id,
-          role: AppConstants.roleUmum,
+          role: AppConstants.rolePasien,
           fullName: name,
           email: email,
           phone: phone,
@@ -99,12 +99,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         errorMessage = 'Email ini sudah terdaftar. Silakan masuk menggunakan akun Anda.';
       } else if (e.toString().contains('network_error') || e.toString().contains('SocketException')) {
         errorMessage = 'Koneksi internet bermasalah. Pastikan Anda terhubung ke internet.';
-      } else if (e.toString().contains('over_email_send_rate_limit')) {
-        errorMessage = 'Terlalu banyak permintaan. Silakan tunggu 1 menit lalu coba lagi.';
-      } else {
-        // Bersihkan pesan error dari format Supabase technical
-        errorMessage = e.toString().replaceAll('AuthApiException:', '').replaceAll('message:', '').split(', statusCode:')[0].trim();
-      }
+     } 
+    //else {
+    //     // Bersihkan pesan error dari format Supabase technical
+    //     errorMessage = e.toString().replaceAll('AuthApiException:', '').replaceAll('message:', '').split(', statusCode:')[0].trim();
+    //   }
 
       Get.snackbar(
         'Pendaftaran Gagal',

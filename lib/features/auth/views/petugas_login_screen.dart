@@ -191,8 +191,6 @@ class _PetugasLoginScreenState extends State<PetugasLoginScreen> {
 
       if (e.toString().contains('user_already_exists')) {
         errorMessage = 'Email ini sudah terdaftar. Silakan masuk.';
-      } else if (e.toString().contains('over_email_send_rate_limit')) {
-        errorMessage = 'Terlalu banyak permintaan. Tunggu 1 menit lalu coba lagi.';
       } else {
         errorMessage = e.toString().replaceAll('AuthApiException:', '').replaceAll('message:', '').split(', statusCode:')[0].trim();
       }
