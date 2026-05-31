@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../app/config/app_colors.dart';
-import '../../../app/config/app_text_styles.dart';
 import '../../../app/routes/app_routes.dart';
+import '../../../core/models/patient_model.dart';
 import '../../../core/widgets/loading_shimmer.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../controllers/tracing_controller.dart';
-import '../widgets/tracing_timeline_item.dart';
 
 class TracingTimelineScreen extends GetView<TracingController> {
   const TracingTimelineScreen({super.key});
@@ -15,16 +14,55 @@ class TracingTimelineScreen extends GetView<TracingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text('Log Tracing Mobilitas'),
+        title: const Text('Pelacakan Mobilitas'),
         backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          // Indikator live update
+          Obx(() => Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: controller.isLoading.value
+                            ? Colors.orange
+                            : Colors.greenAccent,
+                        boxShadow: [
+                          BoxShadow(
+                            color: (controller.isLoading.value
+                                    ? Colors.orange
+                                    : Colors.greenAccent)
+                                .withOpacity(0.5),
+                            blurRadius: 6,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      controller.isLoading.value ? 'Memuat...' : 'Live',
+                      style: const TextStyle(
+                          fontSize: 12, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              )),
+        ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value && controller.trackedPatients.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(16),
-            child: LoadingShimmer(itemCount: 5, height: 100),
+            child: LoadingShimmer(itemCount: 5, height: 90),
           );
         }
 
@@ -38,11 +76,12 @@ class TracingTimelineScreen extends GetView<TracingController> {
           );
         }
 
-        if (controller.tracingLogs.isEmpty) {
+        if (controller.trackedPatients.isEmpty) {
           return const EmptyState(
-            icon: Icons.timeline,
-            title: 'Belum ada data tracing',
-            subtitle: 'Data tracing mobilitas pasien akan muncul di sini',
+            icon: Icons.location_off_outlined,
+            title: 'Belum ada pasien yang dilacak',
+            subtitle:
+                'Pasien yang telah menyetujui akses lokasi GPS akan tampil di sini',
           );
         }
 
@@ -51,52 +90,19 @@ class TracingTimelineScreen extends GetView<TracingController> {
           color: AppColors.primary,
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: controller.tracingLogs.length,
+            itemCount: controller.trackedPatients.length,
             itemBuilder: (context, index) {
-              final tracing = controller.tracingLogs[index];
-              final isLast = index == controller.tracingLogs.length - 1;
-
-              // Date divider
-              Widget? dateDivider;
-              if (index == 0 ||
-                  _isDifferentDay(
-                    controller.tracingLogs[index - 1].visitedAt,
-                    tracing.visitedAt,
-                  )) {
-                dateDivider = _buildDateDivider(tracing.visitedAt);
-              }
-
-              // Determine dot color based on simple heuristics
-              Color dotColor;
-              if (index % 3 == 0) {
-                dotColor = AppColors.danger;
-              } else if (index % 3 == 1) {
-                dotColor = AppColors.warning;
-              } else {
-                dotColor = AppColors.success;
-              }
-
-              return Column(
-                children: [
-                  if (dateDivider != null) dateDivider,
-                  TracingTimelineItem(
-                    patientId: tracing.patientId?.substring(0, 8) ?? '-',
-                    tracingRef: tracing.tracingRef ?? '-',
-                    time: tracing.visitedAt != null
-                        ? DateFormat('HH:mm').format(tracing.visitedAt!)
-                        : '-',
-                    area: tracing.placeName ?? '-',
-                    dotColor: dotColor,
-                    isLast: isLast,
-                    onTap: () {
-                      controller.selectTracing(tracing);
-                      Get.toNamed(
-                        AppRoutes.tracingDetail,
-                        arguments: tracing,
-                      );
-                    },
-                  ),
-                ],
+              final patient = controller.trackedPatients[index];
+              return _PatientTracingCard(
+                patient: patient,
+                controller: controller,
+                onTap: () {
+                  controller.selectPatient(patient);
+                  Get.toNamed(
+                    AppRoutes.tracingDetail,
+                    arguments: patient,
+                  );
+                },
               );
             },
           ),
@@ -104,29 +110,176 @@ class TracingTimelineScreen extends GetView<TracingController> {
       }),
     );
   }
+}
 
-  bool _isDifferentDay(DateTime? a, DateTime? b) {
-    if (a == null || b == null) return true;
-    return a.year != b.year || a.month != b.month || a.day != b.day;
+class _PatientTracingCard extends StatelessWidget {
+  final PatientModel patient;
+  final TracingController controller;
+  final VoidCallback onTap;
+
+  const _PatientTracingCard({
+    required this.patient,
+    required this.controller,
+    required this.onTap,
+  });
+
+  Color _zoneColor(String? zone) {
+    switch (zone?.toLowerCase()) {
+      case 'merah':
+        return const Color(0xFFD32F2F);
+      case 'kuning':
+        return const Color(0xFFF9A825);
+      default:
+        return const Color(0xFF2E7D32);
+    }
   }
 
-  Widget _buildDateDivider(DateTime? date) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            date != null ? DateFormat('dd MMMM yyyy').format(date) : '-',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
+  @override
+  Widget build(BuildContext context) {
+    final latestLog = controller.latestLogFor(patient.id);
+    final zoneColor = _zoneColor(patient.zone);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Header strip
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.04),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.person,
+                        color: AppColors.primary, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          patient.fullName ?? 'Pasien Tanpa Nama',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          patient.nik != null
+                              ? 'NIK: ${patient.nik}'
+                              : 'ID: ${patient.id.substring(0, 8)}',
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Zone badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: zoneColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border:
+                          Border.all(color: zoneColor.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      (patient.zone ?? 'Hijau').toUpperCase(),
+                      style: TextStyle(
+                        color: zoneColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Info row
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+              child: Row(
+                children: [
+                  // GPS dot aktif
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.green.shade400,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.4),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: latestLog != null
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                latestLog.placeName ?? 'Lokasi diperbarui',
+                                style: const TextStyle(
+                                    fontSize: 12.5,
+                                    color: Color(0xFF333333)),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (latestLog.visitedAt != null)
+                                Text(
+                                  'Update: ${DateFormat('dd MMM, HH:mm:ss').format(latestLog.visitedAt!.toLocal())}',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade500),
+                                ),
+                            ],
+                          )
+                        : Text(
+                            'Menunggu data lokasi...',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade400),
+                          ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right,
+                      color: Colors.grey.shade400, size: 20),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

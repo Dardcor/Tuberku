@@ -133,9 +133,34 @@ class SupabaseService extends GetxService {
   }
 
   Future<void> updateGpsConsent(String patientId, {required bool consent}) async {
-    await _client
-        .from(SupabaseConfig.patientsTable)
-        .update({'gps_consent': consent}).eq('id', patientId);
+    try {
+      // Direct update — pastikan RLS policy "Patients can update their own data."
+      // sudah ditambahkan di Supabase Dashboard (lihat instruksi di bawah).
+      await _client
+          .from(SupabaseConfig.patientsTable)
+          .update({'gps_consent': consent})
+          .eq('id', patientId);
+
+      // Verifikasi apakah update benar-benar tersimpan
+      // (RLS yang salah menyebabkan silent-fail tanpa error)
+      final check = await _client
+          .from(SupabaseConfig.patientsTable)
+          .select('gps_consent')
+          .eq('id', patientId)
+          .maybeSingle();
+
+      final saved = check?['gps_consent'] as bool? ?? false;
+      if (saved != consent) {
+        throw Exception(
+          'RLS Policy Error: Persetujuan GPS gagal tersimpan. '
+          'Jalankan SQL policy di Supabase Dashboard (lihat db.sql bagian RLS FIX).',
+        );
+      }
+      debugPrint('[SupabaseService] updateGpsConsent success: consent=$consent');
+    } catch (e) {
+      debugPrint('[SupabaseService] updateGpsConsent error: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateZone(String patientId, String zone) async {
@@ -265,6 +290,21 @@ class SupabaseService extends GetxService {
     }
   }
 
+  Future<List<PatientModel>> getPatientsWithGpsConsent() async {
+    try {
+      final data = await _client
+          .from(SupabaseConfig.patientsTable)
+          .select()
+          .eq('gps_consent', true)
+          .eq('is_active', true)
+          .order('full_name');
+      return data.map((e) => PatientModel.fromJson(e)).toList();
+    } catch (e) {
+      debugPrint('[SupabaseService] getPatientsWithGpsConsent error: $e');
+      return [];
+    }
+  }
+
   // ─── Tracing Logs ─────────────────────────────────────
 
   Future<List<TracingModel>> getTracingLogs({String? patientId}) async {
@@ -275,7 +315,7 @@ class SupabaseService extends GetxService {
       if (patientId != null) {
         query = query.eq('patient_id', patientId);
       }
-      final data = await query.order('visited_at', ascending: false);
+      final data = await query.order('visited_at', ascending: true);
       return data.map((e) => TracingModel.fromJson(e)).toList();
     } catch (e) {
       debugPrint('[SupabaseService] getTracingLogs error: $e');
@@ -295,6 +335,33 @@ class SupabaseService extends GetxService {
     } catch (e) {
       debugPrint('[SupabaseService] getRecentTracingLogs error: $e');
       return [];
+    }
+  }
+
+  Future<void> insertTracingLog(TracingModel log) async {
+    try {
+      await _client
+          .from(SupabaseConfig.tracingLogsTable)
+          .insert(log.toJson());
+    } catch (e) {
+      debugPrint('[SupabaseService] insertTracingLog error: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteOldTracingLogs(String patientId) async {
+    try {
+      final tenMinutesAgo = DateTime.now()
+          .subtract(const Duration(minutes: 10))
+          .toUtc()
+          .toIso8601String();
+      await _client
+          .from(SupabaseConfig.tracingLogsTable)
+          .delete()
+          .eq('patient_id', patientId)
+          .lt('visited_at', tenMinutesAgo);
+    } catch (e) {
+      debugPrint('[SupabaseService] deleteOldTracingLogs error: $e');
     }
   }
 
@@ -354,7 +421,7 @@ class SupabaseService extends GetxService {
 
   Future<void> _seedSurabayaTimurData() async {
     try {
-      // 1. Delete Bandung facilities/zones (which do not match Surabaya Timur)
+      // 1. Delete Bandung facilities/zones (which do not match Surabaya Timur or Surabaya Barat)
       await _client.from('facilities').delete().not('name', 'in', [
         'Puskesmas Mulyorejo',
         'Puskesmas Rungkut',
@@ -365,7 +432,21 @@ class SupabaseService extends GetxService {
         'Puskesmas Gubeng Masjid',
         'Puskesmas Tambaksari',
         'Puskesmas Pacar Keling',
-        'Puskesmas Gading'
+        'Puskesmas Gading',
+        'Puskesmas Benowo',
+        'Puskesmas Pakal',
+        'Puskesmas Sememi',
+        'Puskesmas Balongsari',
+        'Puskesmas Manukan Kulon',
+        'Puskesmas Lakarsantri',
+        'RSUD Bhakti Dharma Husada',
+        'National Hospital',
+        'RS Mitra Keluarga Darmo Satelit',
+        'Klinik Pratama Citra Medika',
+        'Klinik Kimia Farma Lontar',
+        'Apotek Kimia Farma Manukan',
+        'Apotek K-24 Babat Jerawat',
+        'Apotek Guardian GWalk'
       ]);
 
       await _client.from('zones').delete().not('name', 'in', [
@@ -378,26 +459,226 @@ class SupabaseService extends GetxService {
         'Kecamatan Tenggilis Mejoyo'
       ]);
 
-      // 2. Insert Surabaya Timur facilities if they do not exist
+      // 2. Insert Surabaya Timur & Barat facilities if they do not exist
       final existingFacilities = await _client.from('facilities').select('name');
       final existingFacNames = (existingFacilities as List).map((f) => f['name'] as String).toSet();
 
       final facilitiesToSeed = [
-        {'name': 'Puskesmas Mulyorejo', 'type': 'Puskesmas', 'address': 'Jl. Mulyorejo No. 12, Surabaya', 'latitude': -7.2694, 'longitude': 112.7885},
-        {'name': 'Puskesmas Rungkut', 'type': 'Puskesmas', 'address': 'Jl. Rungkut Asri Timur No. 1, Surabaya', 'latitude': -7.3223, 'longitude': 112.7758},
-        {'name': 'Puskesmas Kalirungkut', 'type': 'Puskesmas', 'address': 'Jl. Rungkut Lor No. 22, Surabaya', 'latitude': -7.3200, 'longitude': 112.7810},
-        {'name': 'Puskesmas Sukolilo', 'type': 'Puskesmas', 'address': 'Jl. Sukolilo No. 34, Surabaya', 'latitude': -7.2917, 'longitude': 112.7958},
-        {'name': 'Puskesmas Gunung Anyar', 'type': 'Puskesmas', 'address': 'Jl. Gunung Anyar Timur No. 5, Surabaya', 'latitude': -7.3323, 'longitude': 112.7885},
-        {'name': 'Puskesmas Menur', 'type': 'Puskesmas', 'address': 'Jl. Menur Pumpungan No. 1, Surabaya', 'latitude': -7.2830, 'longitude': 112.7700},
-        {'name': 'Puskesmas Gubeng Masjid', 'type': 'Puskesmas', 'address': 'Jl. Gubeng Masjid No. 2, Surabaya', 'latitude': -7.2750, 'longitude': 112.7530},
-        {'name': 'Puskesmas Tambaksari', 'type': 'Puskesmas', 'address': 'Jl. Tambaksari No. 12, Surabaya', 'latitude': -7.2514, 'longitude': 112.7661},
-        {'name': 'Puskesmas Pacar Keling', 'type': 'Puskesmas', 'address': 'Jl. Pacar Keling No. 15, Surabaya', 'latitude': -7.2590, 'longitude': 112.7600},
-        {'name': 'Puskesmas Gading', 'type': 'Puskesmas', 'address': 'Jl. Kenjeran No. 280, Surabaya', 'latitude': -7.2450, 'longitude': 112.7750},
+        // Surabaya Timur (Puskesmas)
+        {
+          'name': 'Puskesmas Mulyorejo',
+          'type': 'Puskesmas',
+          'address': 'Jl. Mulyorejo No. 12, Surabaya',
+          'latitude': -7.2694,
+          'longitude': 112.7885,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Rungkut',
+          'type': 'Puskesmas',
+          'address': 'Jl. Rungkut Asri Timur No. 1, Surabaya',
+          'latitude': -7.3223,
+          'longitude': 112.7758,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Kalirungkut',
+          'type': 'Puskesmas',
+          'address': 'Jl. Rungkut Lor No. 22, Surabaya',
+          'latitude': -7.3200,
+          'longitude': 112.7810,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Sukolilo',
+          'type': 'Puskesmas',
+          'address': 'Jl. Sukolilo No. 34, Surabaya',
+          'latitude': -7.2917,
+          'longitude': 112.7958,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Gunung Anyar',
+          'type': 'Puskesmas',
+          'address': 'Jl. Gunung Anyar Timur No. 5, Surabaya',
+          'latitude': -7.3323,
+          'longitude': 112.7885,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Menur',
+          'type': 'Puskesmas',
+          'address': 'Jl. Menur Pumpungan No. 1, Surabaya',
+          'latitude': -7.2830,
+          'longitude': 112.7700,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Gubeng Masjid',
+          'type': 'Puskesmas',
+          'address': 'Jl. Gubeng Masjid No. 2, Surabaya',
+          'latitude': -7.2750,
+          'longitude': 112.7530,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Tambaksari',
+          'type': 'Puskesmas',
+          'address': 'Jl. Tambaksari No. 12, Surabaya',
+          'latitude': -7.2514,
+          'longitude': 112.7661,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Pacar Keling',
+          'type': 'Puskesmas',
+          'address': 'Jl. Pacar Keling No. 15, Surabaya',
+          'latitude': -7.2590,
+          'longitude': 112.7600,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Gading',
+          'type': 'Puskesmas',
+          'address': 'Jl. Kenjeran No. 280, Surabaya',
+          'latitude': -7.2450,
+          'longitude': 112.7750,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+
+        // Surabaya Barat (Puskesmas)
+        {
+          'name': 'Puskesmas Benowo',
+          'type': 'Puskesmas',
+          'address': 'Jl. Raya Benowo No. 46, Surabaya',
+          'latitude': -7.2514,
+          'longitude': 112.6342,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Pakal',
+          'type': 'Puskesmas',
+          'address': 'Jl. Babat Jerawat No. 6, Surabaya',
+          'latitude': -7.2415,
+          'longitude': 112.6074,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Sememi',
+          'type': 'Puskesmas',
+          'address': 'Jl. Kendung No. 1, Surabaya',
+          'latitude': -7.2568,
+          'longitude': 112.6515,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Balongsari',
+          'type': 'Puskesmas',
+          'address': 'Jl. Balongsari Tama No. 1, Surabaya',
+          'latitude': -7.2625,
+          'longitude': 112.6738,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Manukan Kulon',
+          'type': 'Puskesmas',
+          'address': 'Jl. Manukan Kulon No. 1, Surabaya',
+          'latitude': -7.2644,
+          'longitude': 112.6622,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Puskesmas Lakarsantri',
+          'type': 'Puskesmas',
+          'address': 'Jl. Lidah Wetan No. 3, Lidah Wetan, Surabaya',
+          'latitude': -7.3115,
+          'longitude': 112.6562,
+          'opening_hours': {'Senin - Jumat': '07:30 - 14:30', 'Sabtu': '07:30 - 11:30', 'Minggu': 'Tutup'}
+        },
+
+        // Surabaya Barat (Rumah Sakit)
+        {
+          'name': 'RSUD Bhakti Dharma Husada',
+          'type': 'Rumah Sakit',
+          'address': 'Jl. Raya Kendung No. 115-117, Surabaya',
+          'latitude': -7.2541,
+          'longitude': 112.6536,
+          'opening_hours': {'Senin - Minggu': '24 Jam'}
+        },
+        {
+          'name': 'National Hospital',
+          'type': 'Rumah Sakit',
+          'address': 'Jl. Boulevard Famili Selatan Kav. 1, Surabaya',
+          'latitude': -7.2917,
+          'longitude': 112.6828,
+          'opening_hours': {'Senin - Minggu': '24 Jam'}
+        },
+        {
+          'name': 'RS Mitra Keluarga Darmo Satelit',
+          'type': 'Rumah Sakit',
+          'address': 'Jl. Kobe No. 102, Surabaya',
+          'latitude': -7.2743,
+          'longitude': 112.6953,
+          'opening_hours': {'Senin - Minggu': '24 Jam'}
+        },
+
+        // Surabaya Barat (Klinik)
+        {
+          'name': 'Klinik Pratama Citra Medika',
+          'type': 'Klinik',
+          'address': 'Jl. Raya Balongsari, Surabaya',
+          'latitude': -7.2789,
+          'longitude': 112.6612,
+          'opening_hours': {'Senin - Sabtu': '07:00 - 21:00', 'Minggu': 'Tutup'}
+        },
+        {
+          'name': 'Klinik Kimia Farma Lontar',
+          'type': 'Klinik',
+          'address': 'Jl. Raya Lontar No. 10, Surabaya',
+          'latitude': -7.2845,
+          'longitude': 112.6791,
+          'opening_hours': {'Senin - Sabtu': '07:00 - 21:00', 'Minggu': 'Tutup'}
+        },
+
+        // Surabaya Barat (Apotek)
+        {
+          'name': 'Apotek Kimia Farma Manukan',
+          'type': 'Apotek',
+          'address': 'Jl. Manukan Tama No. 45, Surabaya',
+          'latitude': -7.2638,
+          'longitude': 112.6685,
+          'opening_hours': {'Senin - Minggu': '08:00 - 22:00'}
+        },
+        {
+          'name': 'Apotek K-24 Babat Jerawat',
+          'type': 'Apotek',
+          'address': 'Jl. Babat Jerawat No. 12, Surabaya',
+          'latitude': -7.2435,
+          'longitude': 112.6120,
+          'opening_hours': {'Senin - Minggu': '24 Jam'}
+        },
+        {
+          'name': 'Apotek Guardian GWalk',
+          'type': 'Apotek',
+          'address': 'GWalk Citraland, Surabaya',
+          'latitude': -7.2812,
+          'longitude': 112.6480,
+          'opening_hours': {'Senin - Minggu': '09:00 - 22:00'}
+        },
       ];
 
       for (final fac in facilitiesToSeed) {
-        if (!existingFacNames.contains(fac['name'])) {
+        final name = fac['name'] as String;
+        if (!existingFacNames.contains(name)) {
           await _client.from('facilities').insert(fac);
+        } else {
+          await _client.from('facilities').update({
+            'opening_hours': fac['opening_hours'],
+            'address': fac['address'],
+            'latitude': fac['latitude'],
+            'longitude': fac['longitude'],
+            'type': fac['type']
+          }).eq('name', name);
         }
       }
 

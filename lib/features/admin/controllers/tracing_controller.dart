@@ -1,53 +1,90 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/tracing_model.dart';
+import '../../../core/models/patient_model.dart';
 
 class TracingController extends GetxController {
   final _supabase = Get.find<SupabaseService>();
 
+  // ── Daftar pasien ber-GPS-consent ──────────────────────────────────────
   final isLoading = true.obs;
   final hasError = false.obs;
-  final tracingLogs = <TracingModel>[].obs;
+  final trackedPatients = <PatientModel>[].obs;
 
-  // Detail view
-  final Rx<TracingModel?> selectedTracing = Rx<TracingModel?>(null);
+  // ── Detail pasien yang dipilih ─────────────────────────────────────────
+  final isDetailLoading = false.obs;
+  final selectedPatient = Rx<PatientModel?>(null);
   final patientTracingLogs = <TracingModel>[].obs;
+
+  // ── Legacy: single tracing log (digunakan oleh tracing_timeline_screen) ─
+  final tracingLogs = <TracingModel>[].obs;
+  final Rx<TracingModel?> selectedTracing = Rx<TracingModel?>(null);
+
+  Timer? _refreshTimer;
 
   @override
   void onInit() {
     super.onInit();
-    _loadData();
+    _loadPatients();
+    // Auto-refresh setiap 10 detik untuk update posisi terbaru
+    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _loadPatients();
+      if (selectedPatient.value != null) {
+        _loadPatientLogs(selectedPatient.value!.id);
+      }
+    });
   }
 
-  Future<void> _loadData() async {
-    isLoading.value = true;
+  @override
+  void onClose() {
+    _refreshTimer?.cancel();
+    super.onClose();
+  }
+
+  // ── Load daftar pasien yang sudah acc GPS ───────────────────────────────
+  Future<void> _loadPatients() async {
+    if (!isLoading.value) isLoading.value = true;
     hasError.value = false;
-
     try {
-      final result = await _supabase.getTracingLogs();
-      tracingLogs.assignAll(result);
+      final patients = await _supabase.getPatientsWithGpsConsent();
+      trackedPatients.assignAll(patients);
+
+      // Isi tracingLogs dengan log terbaru dari semua pasien (untuk timeline view)
+      if (patients.isNotEmpty) {
+        final allLogs = await _supabase.getTracingLogs();
+        tracingLogs.assignAll(allLogs);
+      }
     } catch (e) {
-      debugPrint('[TracingController] loadData error: $e');
+      debugPrint('[TracingController] _loadPatients error: $e');
       hasError.value = true;
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> loadPatientTracing(String patientId) async {
-    isLoading.value = true;
+  // ── Load semua log untuk pasien tertentu ────────────────────────────────
+  Future<void> _loadPatientLogs(String patientId) async {
+    isDetailLoading.value = true;
     try {
-      final result = await _supabase.getTracingLogs(patientId: patientId);
-      patientTracingLogs.assignAll(result);
+      final logs = await _supabase.getTracingLogs(patientId: patientId);
+      patientTracingLogs.assignAll(logs);
     } catch (e) {
-      debugPrint('[TracingController] loadData error: $e');
-      hasError.value = true;
+      debugPrint('[TracingController] _loadPatientLogs error: $e');
     } finally {
-      isLoading.value = false;
+      isDetailLoading.value = false;
     }
   }
 
+  // ── Dipanggil ketika petugas memilih pasien untuk dilihat detailnya ─────
+  void selectPatient(PatientModel patient) {
+    selectedPatient.value = patient;
+    patientTracingLogs.clear();
+    _loadPatientLogs(patient.id);
+  }
+
+  // ── Legacy: masih dipakai oleh tracing_timeline_screen ──────────────────
   void selectTracing(TracingModel tracing) {
     selectedTracing.value = tracing;
     if (tracing.patientId != null) {
@@ -55,7 +92,33 @@ class TracingController extends GetxController {
     }
   }
 
+  Future<void> loadPatientTracing(String patientId) async {
+    isDetailLoading.value = true;
+    try {
+      final result = await _supabase.getTracingLogs(patientId: patientId);
+      patientTracingLogs.assignAll(result);
+    } catch (e) {
+      debugPrint('[TracingController] loadPatientTracing error: $e');
+    } finally {
+      isDetailLoading.value = false;
+    }
+  }
+
+  // ── Titik terbaru untuk preview di daftar pasien ─────────────────────────
+  TracingModel? latestLogFor(String patientId) {
+    try {
+      return tracingLogs
+          .where((l) => l.patientId == patientId)
+          .reduce((a, b) =>
+              (a.visitedAt ?? DateTime(0)).isAfter(b.visitedAt ?? DateTime(0))
+                  ? a
+                  : b);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> refresh() async {
-    await _loadData();
+    await _loadPatients();
   }
 }

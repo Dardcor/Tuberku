@@ -166,7 +166,7 @@ class PatientDetailScreen extends GetView<PatientDetailController> {
                   _buildDetailRow('Nomor Telepon', p.phone ?? 'Tidak Ada No HP'),
                   _buildDetailRow('Alamat Domicile', p.address ?? 'Tidak Ada Alamat'),
                   _buildDetailRow('Kecamatan', p.district ?? 'Tidak Ada Kecamatan'),
-                  _buildDetailRow('Kode Aktivasi', p.activationCode ?? 'Belum Diatur'),
+                  _buildDetailRow('Kode Aktivasi', p.activationCode ?? 'Sudah Aktif / Tidak Ada Kode'),
                 ],
               ),
 
