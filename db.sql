@@ -141,6 +141,9 @@ begin
     if not exists (select 1 from pg_policies where policyname = 'Only petugas can update patients.') then
         create policy "Only petugas can update patients." on public.patients for update using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
     end if;
+    if not exists (select 1 from pg_policies where policyname = 'Patients can update their own data.') then
+        create policy "Patients can update their own data." on public.patients for update using ( auth.uid() = profile_id );
+    end if;
     if not exists (select 1 from pg_policies where policyname = 'Only petugas can delete patients.') then
         create policy "Only petugas can delete patients." on public.patients for delete using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
     end if;
@@ -155,6 +158,33 @@ begin
     end if;
     if not exists (select 1 from pg_policies where policyname = 'Petugas can delete tracing logs.') then
         create policy "Petugas can delete tracing logs." on public.tracing_logs for delete using ( exists (select 1 from public.profiles where id = auth.uid() and role = 'petugas') );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Patients can insert own tracing logs.') then
+        create policy "Patients can insert own tracing logs." on public.tracing_logs for insert with check (
+            exists (
+                select 1 from public.patients 
+                where patients.id = patient_id 
+                and patients.profile_id = auth.uid()
+            )
+        );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Patients can view own tracing logs.') then
+        create policy "Patients can view own tracing logs." on public.tracing_logs for select using (
+            exists (
+                select 1 from public.patients 
+                where patients.id = patient_id 
+                and patients.profile_id = auth.uid()
+            )
+        );
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Patients can delete own tracing logs.') then
+        create policy "Patients can delete own tracing logs." on public.tracing_logs for delete using (
+            exists (
+                select 1 from public.patients 
+                where patients.id = patient_id 
+                and patients.profile_id = auth.uid()
+            )
+        );
     end if;
     if not exists (select 1 from pg_policies where policyname = 'Zones are viewable by everyone.') then
         create policy "Zones are viewable by everyone." on public.zones for select using (true);
@@ -324,3 +354,65 @@ begin
         create policy "Allow insert for authenticated users" on public.articles for insert with check (auth.role() = 'authenticated');
     end if;
 end $$;
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- PATIENT SELF-SERVICE FUNCTIONS (bypass RLS via SECURITY DEFINER)
+-- Jalankan SQL ini di Supabase Dashboard → SQL Editor
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- 1. Pasien dapat mengubah persetujuan GPS milik sendiri
+create or replace function public.set_gps_consent(p_consent boolean)
+returns void as $$
+begin
+  update public.patients
+  set gps_consent = p_consent
+  where profile_id = auth.uid();
+end;
+$$ language plpgsql security definer;
+
+-- 2. Pasien dapat menyisipkan log tracing milik sendiri
+--    (hanya jika gps_consent = true & is_active = true)
+create or replace function public.insert_patient_tracing_log(
+  p_lat   double precision,
+  p_lng   double precision,
+  p_place_name  text    default null,
+  p_tracing_ref text    default null
+)
+returns void as $$
+declare
+  v_patient_id uuid;
+begin
+  select id into v_patient_id
+  from public.patients
+  where profile_id = auth.uid()
+    and gps_consent  = true
+    and is_active    = true;
+
+  if v_patient_id is null then
+    raise exception 'GPS consent not granted or patient not active';
+  end if;
+
+  insert into public.tracing_logs
+    (patient_id, latitude, longitude, place_name, tracing_ref, visited_at, created_at)
+  values
+    (v_patient_id, p_lat, p_lng, p_place_name, p_tracing_ref, now(), now());
+end;
+$$ language plpgsql security definer;
+
+-- 3. Hapus log lama (>10 menit) milik pasien sendiri
+create or replace function public.cleanup_patient_tracing_logs()
+returns void as $$
+declare
+  v_patient_id uuid;
+begin
+  select id into v_patient_id
+  from public.patients
+  where profile_id = auth.uid();
+
+  if v_patient_id is not null then
+    delete from public.tracing_logs
+    where patient_id = v_patient_id
+      and visited_at < now() - interval '10 minutes';
+  end if;
+end;
+$$ language plpgsql security definer;
